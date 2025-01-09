@@ -1,12 +1,22 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import mlflow.pyfunc
+from mlflow import MlflowClient
 import numpy as np
-
+from pprint import pprint
 #Charger le modèle depuis MLflow
-model_uri = "runs:/183919622f5942c8b98625b1d39dcb8a/model"  # Remplacez <RUN_ID> par l'ID du run MLflow.
-#model = mlflow.pyfunc.load_model(model_uri)
+#model_uri = "runs:/636da9c2964f4fe9a577a19c48e25c7d/model"  # Remplacez <RUN_ID> par l'ID du run MLflow.
 
+# client = MlflowClient()
+# experiment = client.get_experiment_by_name("imo")
+# run = client.search_runs(experiment.experiment_id)[0]
+# model_uri = f"runs:/{run.info.run_id}/model"  # Remplacez <RUN_ID> par l'ID du run MLflow.
+# model = mlflow.pyfunc.load_model(model_uri)
+
+model_name = "sk-learn-random-forest-reg-model"
+model_version = 1
+
+model = mlflow.pyfunc.load_model(model_uri=f"models:/{model_name}/{model_version}")
 # Initialiser l'application FastAPI
 app = FastAPI(
     title="Californie Housing price prediction"
@@ -35,5 +45,5 @@ def predict(input_data: Input):
                            input_data.total_rooms, input_data.total_bedrooms, input_data.population,
                            input_data.households, input_data.median_income]])
     # Faire une prédiction
-    prediction = np.sum(features) #model.predict(features)
-    return {"prediction": float(prediction)} #{"prediction": float(prediction[0])}
+    prediction = model.predict(features) #np.sum(features) 
+    return {"prediction": float(prediction[0])} #{"prediction": float(prediction)} #
