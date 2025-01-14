@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "Projet-MLOps-imo-BM"
+name = "projet-mlops-imo-bm"
 version = "0.1.0"
 description = ""
 authors = ["BrightMehou <joanemehou@gmail.com>"]
