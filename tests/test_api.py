@@ -14,16 +14,17 @@ def test_api_is_running():
 # Test pour vérifier une prédiction valide
 def test_valid_prediction():
     payload = {
-        "longitude": -122.23,
-        "latitude": 37.88,
-        "housing_median_age": 41.0,
-        "total_rooms": 880.0,
-        "total_bedrooms": 129.0,
+        "medinc": 8.3252,
+        "houseage": 41.0,
+        "averooms": 880.0,
+        "avebedrms": 129.0,
         "population": 322.0,
-        "households": 126.0,
-        "median_income": 8.3252
+        "aveoccup": 126.0,
+        "latitude": 37.88,
+        "longitude": -122.23
     }
     response = client.post("/predict", json=payload)
+    print(response.json())
     assert response.status_code == 200
     assert "prediction" in response.json()
     assert isinstance(response.json()["prediction"], float)

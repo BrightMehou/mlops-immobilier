@@ -7,8 +7,14 @@ def test_initial_state():
     # Vérifier l'état initial
     assert len(at.text_input) == 8  # 8 champs de texte pour les fonctionnalités
     assert len(at.button) == 1  # Bouton "Predict"
-    assert at.text_input[0].label == "Longitude"
-    assert at.text_input[1].label == "Latitude"
+    assert at.text_input[0].label == "Median income"
+    assert at.text_input[1].label == "House age"
+    assert at.text_input[2].label == "Average number of rooms per household"
+    assert at.text_input[3].label == "Average number of bedrooms per household"
+    assert at.text_input[4].label == "Population"
+    assert at.text_input[5].label == "Average number of household members"
+    assert at.text_input[6].label == "Latitude"
+    assert at.text_input[7].label == "Longitude"
     assert at.button[0].label == "Predict"
     assert len(at.markdown) == 2  # 2 éléments Markdown
     #assert not at.session_state.get("prediction", None)  # Pas de prédiction initialement
@@ -41,4 +47,4 @@ def test_invalid_input():
     at.text_input[1].input("xyz")  # Latitude (valeur non valide)
     at.button[0].click().run()  # Cliquer sur "Predict"
     
-    assert "could not convert string to float:" in at.exception[0].value # Un message d'avertissement devrait être affiché
+    assert at.markdown[2].value == "Please enter valid numbers in all fields."  # Message d'erreur affiché

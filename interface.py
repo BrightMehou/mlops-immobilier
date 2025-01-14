@@ -1,29 +1,43 @@
 import streamlit as st
 import requests
-from app import Input
-
+from src.train import Input
 
 st.markdown("# California Housing Price Prediction")
 st.write("This is a simple web app that predicts the price of a house in California based on some features. If you want to know the price of a house, please provide the following information and click on the 'Predict' button.")
 
 def model_prediction(Input):
     url = "http://localhost:8000/predict"
-    response = requests.post(url, json=Input.model_dump())
-    return response.json()["prediction"]
+    try:
+        response = requests.post(url, json=Input.model_dump())
+    except requests.exceptions.RequestException as e:
+        return "Error: the model could not make a prediction."
+    if response.status_code != 200:
+        return "Error: the model could not make a prediction."
+    prediction = response.json()["prediction"]
+    return f"The predicted housing price is: {prediction} dollars."
 
-longitude = st.text_input("Longitude", value=0.0)
-latitude = st.text_input("Latitude", value=0.0)
-housing_median_age = st.text_input("Housing median age", value=0.0)
-total_rooms = st.text_input("Total rooms", value=0.0)
-total_bedrooms = st.text_input("Total bedrooms", value=0.0)
+
+medinc = st.text_input("Median income", value=0.0)
+houseage = st.text_input("House age", value=0.0)
+averooms = st.text_input("Average number of rooms per household", value=0.0)
+avebedrms = st.text_input("Average number of bedrooms per household", value=0.0)
 population = st.text_input("Population", value=0.0)
-households = st.text_input("Households", value=0.0)
-median_income = st.text_input("Median income", value=0.0)
-
+aveoccup = st.text_input("Average number of household members", value=0.0)
+latitude = st.text_input("Latitude", value=0.0)
+longitude = st.text_input("Longitude", value=0.0)
 if st.button("Predict"):
-    Input = Input(
-        longitude=float(longitude), latitude=float(latitude), housing_median_age=float(housing_median_age),
-        total_rooms=float(total_rooms), total_bedrooms=float(total_bedrooms), population=float(population),
-        households=float(households), median_income=float(median_income)) 
-    prediction = model_prediction(Input=Input)
-    st.write(f"The predicted housing price is: {prediction} dollars.")
+    try:
+        medinc = float(medinc)
+        houseage = float(houseage)
+        averooms = float(averooms)
+        avebedrms = float(avebedrms)
+        population = float(population)
+        aveoccup = float(aveoccup)
+        latitude = float(latitude)
+        longitude = float(longitude)
+        Input = Input(medinc=medinc, houseage=houseage, averooms=averooms, avebedrms=avebedrms, population=population, aveoccup=aveoccup, latitude=latitude, longitude=longitude)
+        prediction = model_prediction(Input=Input)
+        st.write(prediction)
+    except ValueError:
+        st.write("Please enter valid numbers in all fields.")
+   
