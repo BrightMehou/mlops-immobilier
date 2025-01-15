@@ -13,7 +13,7 @@ from pydantic import BaseModel
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-rel_path = "./data/mlruns/"
+rel_path = "./mlruns/"
 mlflow.set_tracking_uri(f"file:{rel_path}")
 
 random_state = 42

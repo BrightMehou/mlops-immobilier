@@ -29,7 +29,10 @@ jobs:
 
       - name: Install dependencies
         run: poetry install --no-root
-
+      
+      - name: build model
+        run: poetry run python src/train.py
+        
       - name: Run tests
         run: poetry run pytest
 
