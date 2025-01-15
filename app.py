@@ -11,8 +11,6 @@ from src.train import Input
 
 model_name = "Production-model"
 model_version = 1
-rel_path = "./data/mlruns/"
-mlflow.set_tracking_uri(f"file:{rel_path}")
 model = mlflow.pyfunc.load_model(model_uri=f"models:/{model_name}/{model_version}")
 # Initialiser l'application FastAPI
 app = FastAPI(
