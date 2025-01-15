@@ -9,7 +9,7 @@ def model_prediction(Input):
     url = "http://localhost:8000/predict"
     try:
         response = requests.post(url, json=Input.model_dump())
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         return "Error: the model could not make a prediction."
     if response.status_code != 200:
         return "Error: the model could not make a prediction."

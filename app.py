@@ -1,13 +1,9 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 import mlflow.pyfunc
-from mlflow import MlflowClient
 import numpy as np
 import pandas as pd
 from src.train import Input
 
-#Charger le modèle depuis MLflow
-#model_uri = "runs:/636da9c2964f4fe9a577a19c48e25c7d/model"  # Remplacez <RUN_ID> par l'ID du run MLflow.
 
 model_name = "Production-model"
 model_version = 1
