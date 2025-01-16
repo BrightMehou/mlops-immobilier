@@ -14,14 +14,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 
-random_state = 42
-housing = fetch_california_housing(as_frame=True)
-# Prepare the data
-X = housing.data
-y = housing.target
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=random_state)
-
-
 def train_model(model: BaseEstimator, X_train: DataFrame, y_train: DataFrame):
     logger.info("Starting model training...")
     # Define the search
@@ -29,7 +21,7 @@ def train_model(model: BaseEstimator, X_train: DataFrame, y_train: DataFrame):
     logger.info("Model training completed.")
     return model
 
-def evalute_model(model: BaseEstimator, X_test, y_test):
+def evalute_model(model: BaseEstimator, X_test: DataFrame, y_test: DataFrame):
     logger.info("Starting model testing...")
     y_pred = model.predict(X_test)
     scores = {
@@ -40,10 +32,11 @@ def evalute_model(model: BaseEstimator, X_test, y_test):
     logger.info("Model testing completed.")
     return scores
 
-def log_model(run_name, model, params, metrics, experiment_name="Imo_production", model_name="Production-model"):
+def log_model(model: BaseEstimator, params: dict, metrics: dict,
+               X_train: DataFrame,run_name: str = None, experiment_name: str = "Imo_production", model_name: str = "Production-model"):
     logger.info(f"Logging model to MLflow with run name: {run_name}...")
     mlflow.set_experiment(experiment_name)
-    with mlflow.start_run(run_name=run_name):
+    with mlflow.start_run(run_name=run_name) as run:
         signature = infer_signature(X_train, model.predict(X_train))
         mlflow.log_params(params)
         mlflow.log_metrics(metrics)
@@ -52,11 +45,17 @@ def log_model(run_name, model, params, metrics, experiment_name="Imo_production"
                                  signature=signature,
                                  registered_model_name=model_name)
     logger.info("Model logged to MLflow.")
-
+    return run.info.run_id
 
 
 def main():
     # Define the grid
+    random_state = 42
+    housing = fetch_california_housing(as_frame=True)
+    # Prepare the data
+    X = housing.data
+    y = housing.target
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=random_state)
     params = {
             'n_estimators': 150,
             'max_depth': 5,
@@ -69,8 +68,7 @@ def main():
     logger.info(f"Starting the entire training and testing pipeline with run name: {run_name}...")
     model = train_model(model, X_train, y_train)
     scores = evalute_model(model, X_test, y_test)
-    #metrics = dict(**scores,**time)
-    log_model(run_name, model, params, scores, model_name=model_name)
+    log_model(model, params, scores, X_train, run_name=run_name, model_name=model_name)
     logger.info("Pipeline completed.")
 
 

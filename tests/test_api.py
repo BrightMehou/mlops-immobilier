@@ -1,18 +1,22 @@
 from fastapi.testclient import TestClient
 import pytest
-from src.api.app import app  # Remplacez 'main' par le nom de votre fichier contenant l'API
+from src.api.app import app
+
+
 
 # Créer un client de test pour l'API
-client = TestClient(app)
+@pytest.fixture
+def client():
+    return TestClient(app)
 
 # Test pour vérifier que l'API est accessible
-def test_api_is_running():
+def test_api_is_running(client):
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"msg": "Hello World"}
     
 # Test pour vérifier une prédiction valide
-def test_valid_prediction():
+def test_valid_prediction(client):
     payload = {
         "medinc": 8.3252,
         "houseage": 41.0,
@@ -52,7 +56,7 @@ def test_valid_prediction():
     "total_rooms", "total_bedrooms", "population", 
     "households", "median_income"
 ])
-def test_missing_field(missing_field):
+def test_missing_field(client,missing_field):
     payload = {
         "longitude": -122.23,
         "latitude": 37.88,
@@ -68,7 +72,7 @@ def test_missing_field(missing_field):
     assert response.status_code == 422  # Unprocessable Entity
 
 # Test pour vérifier les types de données invalides
-def test_invalid_data_type():
+def test_invalid_data_type(client):
     payload = {
         "longitude": "not_a_float",
         "latitude": 37.88,
@@ -83,6 +87,6 @@ def test_invalid_data_type():
     assert response.status_code == 422  # Unprocessable Entity
 
 # Test pour vérifier un tableau vide (aucune donnée envoyée)
-def test_empty_payload():
+def test_empty_payload(client):
     response = client.post("/predict", json={})
     assert response.status_code == 422  # Unprocessable Entity
