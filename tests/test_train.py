@@ -6,6 +6,8 @@ from sklearn.model_selection import train_test_split
 from mlflow import MlflowClient
 from pandas import DataFrame
 from sklearn.base import BaseEstimator
+
+
 @pytest.fixture
 def data() -> tuple[DataFrame]:
     """
@@ -103,7 +105,9 @@ def test_evalute_model(data: tuple[DataFrame], model: BaseEstimator) -> None:
     assert isinstance(scores["r2"], float)
 
 
-def test_log_model(mlflow_client: MlflowClient, model: BaseEstimator, data: tuple[DataFrame]) -> None:
+def test_log_model(
+    mlflow_client: MlflowClient, model: BaseEstimator, data: tuple[DataFrame]
+) -> None:
     """
     Teste si la fonction `log_model` enregistre correctement un modèle dans MLflow.
 

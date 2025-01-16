@@ -16,7 +16,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def train_model(model: BaseEstimator, X_train: DataFrame, y_train: DataFrame) -> BaseEstimator:
+def train_model(
+    model: BaseEstimator, X_train: DataFrame, y_train: DataFrame
+) -> BaseEstimator:
     """
     Entraîne un modèle de machine learning avec les données fournies.
 

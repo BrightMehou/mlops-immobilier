@@ -16,7 +16,7 @@ def client() -> TestClient:
 
 
 # Test pour vérifier que l'API est accessible
-def test_api_is_running(client: TestClient) -> None: 
+def test_api_is_running(client: TestClient) -> None:
     """
     Vérifie que le point de terminaison racine ("/") de l'API est accessible.
 
