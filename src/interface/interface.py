@@ -1,30 +1,43 @@
 import streamlit as st
 import requests
 
-st.markdown("# California Housing Price Prediction")
-st.write("This is a simple web app that predicts the price of a house in California based on some features. If you want to know the price of a house, please provide the following information and click on the 'Predict' button.")
+st.markdown("# Prédiction des prix des logements en Californie")
+st.write(
+    "Cette application web prédit le prix d'une maison en Californie en fonction de certaines caractéristiques. "
+    "Veuillez fournir les informations demandées ci-dessous, puis cliquez sur le bouton 'Prédire'."
+)
 
-def model_prediction(input: dict):
+
+def model_prediction(input: dict) -> str:
+    """
+    Envoie les données au modèle via une requête POST et récupère la prédiction.
+    Args:
+        input (dict): Les données d'entrée au format JSON.
+    Returns:
+        str: La prédiction ou un message d'erreur.
+    """
     url = "http://localhost:8000/predict"
     try:
         response = requests.post(url, json=input)
     except requests.exceptions.RequestException:
-        return "Error: the model could not make a prediction."
+        return "Erreur : le modèle n'a pas pu effectuer une prédiction."
     if response.status_code != 200:
-        return "Error: the model could not make a prediction."
+        return "Erreur : le modèle n'a pas pu effectuer une prédiction."
     prediction = response.json()["prediction"]
-    return f"The predicted housing price is: {prediction} dollars."
+    return f"Le prix prédit pour le logement est : {prediction*(10**5):.0f} dollars."
 
 
-medinc = st.text_input("Median income", value=0.0)
-houseage = st.text_input("House age", value=0.0)
-averooms = st.text_input("Average number of rooms per household", value=0.0)
-avebedrms = st.text_input("Average number of bedrooms per household", value=0.0)
-population = st.text_input("Population", value=0.0)
-aveoccup = st.text_input("Average number of household members", value=0.0)
-latitude = st.text_input("Latitude", value=0.0)
-longitude = st.text_input("Longitude", value=0.0)
-if st.button("Predict"):
+medinc = st.text_input("Revenu médian des ménages", value=0.0)
+houseage = st.text_input("Âge moyen des maisons", value=0.0)
+averooms = st.text_input("Nombre moyen de pièces par logement", value=0.0)
+avebedrms = st.text_input("Nombre moyen de chambres par logement", value=0.0)
+population = st.text_input("Population de la région", value=0.0)
+aveoccup = st.text_input("Nombre moyen d'occupants par logement", value=0.0)
+latitude = st.text_input("Latitude de la région", value=0.0)
+longitude = st.text_input("Longitude de la région", value=0.0)
+
+# Bouton pour déclencher la prédiction
+if st.button("Prédire"):
     try:
         medinc = float(medinc)
         houseage = float(houseage)
@@ -43,10 +56,9 @@ if st.button("Predict"):
             "population": population,
             "aveoccup": aveoccup,
             "latitude": latitude,
-            "longitude": longitude
+            "longitude": longitude,
         }
         prediction = model_prediction(input=input)
         st.write(prediction)
     except ValueError:
-        st.write("Please enter valid numbers in all fields.")
-   
+        st.write("Veuillez entrer des nombres valides dans tous les champs.")
