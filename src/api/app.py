@@ -2,8 +2,18 @@ from fastapi import FastAPI
 import mlflow.pyfunc
 import numpy as np
 import pandas as pd
-from src.train import Input
+from pydantic import BaseModel
 
+# Schéma pour les données d'entrée
+class Input(BaseModel):
+    medinc: float
+    houseage: float
+    averooms: float
+    avebedrms: float
+    population: float
+    aveoccup: float
+    latitude: float
+    longitude: float
 
 model_name = "Production-model"
 model_version = 1
@@ -27,6 +37,5 @@ def predict(input_data: Input):
     features = np.array([[input_data.medinc, input_data.houseage, input_data.averooms, input_data.avebedrms, input_data.population, input_data.aveoccup, input_data.latitude, input_data.longitude]])
     # Faire une prédiction
     features = pd.DataFrame(features, columns=["MedInc", "HouseAge", "AveRooms", "AveBedrms", "Population", "AveOccup", "Latitude", "Longitude"])
-    prediction = model.predict(features) 
-    print(prediction)
+    prediction = model.predict(features)
     return {"prediction": float(prediction[0])} 

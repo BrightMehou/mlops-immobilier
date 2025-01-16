@@ -1,7 +1,7 @@
 import pytest
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.datasets import fetch_california_housing
-from src.train import train_model, evalute_model, log_model
+from src.ml.train import train_model, evalute_model, log_model
 from sklearn.model_selection import train_test_split
 import logging
 from mlflow import MlflowClient

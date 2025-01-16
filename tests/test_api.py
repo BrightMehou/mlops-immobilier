@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 import pytest
-from app import app, Input  # Remplacez 'main' par le nom de votre fichier contenant l'API
+from src.api.app import app  # Remplacez 'main' par le nom de votre fichier contenant l'API
 
 # Créer un client de test pour l'API
 client = TestClient(app)

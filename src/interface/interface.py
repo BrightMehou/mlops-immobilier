@@ -1,14 +1,13 @@
 import streamlit as st
 import requests
-from src.train import Input
 
 st.markdown("# California Housing Price Prediction")
 st.write("This is a simple web app that predicts the price of a house in California based on some features. If you want to know the price of a house, please provide the following information and click on the 'Predict' button.")
 
-def model_prediction(Input):
+def model_prediction(input: dict):
     url = "http://localhost:8000/predict"
     try:
-        response = requests.post(url, json=Input.model_dump())
+        response = requests.post(url, json=input)
     except requests.exceptions.RequestException:
         return "Error: the model could not make a prediction."
     if response.status_code != 200:
@@ -35,8 +34,18 @@ if st.button("Predict"):
         aveoccup = float(aveoccup)
         latitude = float(latitude)
         longitude = float(longitude)
-        Input = Input(medinc=medinc, houseage=houseage, averooms=averooms, avebedrms=avebedrms, population=population, aveoccup=aveoccup, latitude=latitude, longitude=longitude)
-        prediction = model_prediction(Input=Input)
+
+        input = {
+            "medinc": medinc,
+            "houseage": houseage,
+            "averooms": averooms,
+            "avebedrms": avebedrms,
+            "population": population,
+            "aveoccup": aveoccup,
+            "latitude": latitude,
+            "longitude": longitude
+        }
+        prediction = model_prediction(input=input)
         st.write(prediction)
     except ValueError:
         st.write("Please enter valid numbers in all fields.")

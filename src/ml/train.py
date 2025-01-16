@@ -8,7 +8,7 @@ import mlflow.sklearn
 from mlflow.models import infer_signature
 import logging
 from sklearn.ensemble import GradientBoostingRegressor
-from pydantic import BaseModel
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -21,16 +21,6 @@ X = housing.data
 y = housing.target
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=random_state)
 
-# Schéma pour les données d'entrée
-class Input(BaseModel):
-    medinc: float
-    houseage: float
-    averooms: float
-    avebedrms: float
-    population: float
-    aveoccup: float
-    latitude: float
-    longitude: float
 
 def train_model(model: BaseEstimator, X_train: DataFrame, y_train: DataFrame):
     logger.info("Starting model training...")
