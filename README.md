@@ -145,7 +145,7 @@ uvicorn fichier:app --reload
 
 poetry run mlflow ui --backend-store-uri sqlite:///mlflow.db
 
-poetry run pytest -p no:warnings 
+poetry run pytest  
 
 http://127.0.0.1:8000/redoc
 

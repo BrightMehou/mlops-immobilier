@@ -109,7 +109,7 @@ def main() -> None:
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=random_state
     )
-    params = {"n_estimators": 150, "max_depth": 5, "random_state": random_state}
+    params = {"n_estimators": 150, "max_depth": 5, "learning_rate": 0.15 ,"random_state": random_state}
 
     model = GradientBoostingRegressor(**params)
     run_name = "Production-model"
