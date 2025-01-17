@@ -1,7 +1,16 @@
 services:
-  server:
+  fastapi:
     build:
       context: .
     ports:
       - 8000:8000
+  interface:
+    build:
+      context: .
+      dockerfile: src/interface/Dockerfile
+    ports:
+      - "8501:8501"
+    depends_on:
+      - fastapi
+
   

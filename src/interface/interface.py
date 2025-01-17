@@ -16,7 +16,7 @@ def model_prediction(input: dict) -> str:
     Returns:
         str: La prédiction ou un message d'erreur.
     """
-    url = "http://localhost:8000/predict"
+    url = "http://fastapi:8000/predict" #"http://localhost:8000/predict"
     try:
         response = requests.post(url, json=input)
     except requests.exceptions.RequestException:
