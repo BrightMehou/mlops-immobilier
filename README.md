@@ -132,10 +132,6 @@ Voici la structure du projet :
 - **Poetry** : Gestion des dépendances et des environnements
 - **Pytest** : Framework de tests
 
-## Contributeurs
-
-Listez les contributeurs ici.
-
 ## Licence
 
 Ce projet est sous licence [MIT](LICENSE).
