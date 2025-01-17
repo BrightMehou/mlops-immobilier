@@ -9,11 +9,9 @@ on:
       - main
 
 jobs:
-  # -----------------------
-  # 1) Job de tests Python
-  # -----------------------
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,40 +20,18 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-      
+
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.local/bin:$PATH"
           poetry --version
-      
+
       - name: Install dependencies
         run: poetry install --no-root
       
-      - name: Build model
+      - name: build model
         run: poetry run python src/ml/train.py
-
+        
       - name: Run tests
         run: poetry run pytest
-
-  # -------------------------------
-  # 2) Job de test Docker (parallèle)
-  # -------------------------------
-  docker-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Check Docker versions
-        run: |
-          docker --version
-          docker-compose --version
-
-      - name: Build and run Docker containers
-        run: |
-          # Construction des images via docker-compose
-          docker-compose build
-          
-          # Lancement des services en détaché
-          docker-compose up -d

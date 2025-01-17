@@ -9,11 +9,10 @@ Voici la structure du projet :
 ```
 ├───.github
 │   └───workflows         # Fichiers pour l'intégration et déploiement continus (CI/CD)
-├───.pytest_cache         # Cache des tests Pytest
-├───conf                  # Fichiers de configuration
 ├───notebooks             # Notebooks Jupyter pour l'exploration et les analyses préliminaires
 │   ├───Analyse_des_features    # Analyse de l'importance des caractéristiques avec SHAP
 │   ├───Analyse_exploratoire    # Analyse exploratoire des données
+│   ├───Data_drift_detection    # Pour détecter d'éventuelle data_drift
 │   ├───Experimentations        # Tests et sélection du meilleur modèle à mettre en production
 ├───src                   # Code source du projet
 │   ├───api               # API construite avec FastAPI (fichier app.py)
@@ -55,6 +54,7 @@ Voici la structure du projet :
 7. **Tests Unitaires** :
    - Couverture des fonctions critiques, y compris l'entraînement, l'évaluation, et les points de terminaison de l'API.
 
+
 ## Installation
 
 1. **Cloner le répertoire** :
@@ -64,53 +64,55 @@ Voici la structure du projet :
    ```
 
 2. **Installer Poetry** :
-   Si Poetry n'est pas encore installé :
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
+   Si Poetry n'est pas encore installé : [Poetry](https://python-poetry.org/docs/)
 
 3. **Installer les dépendances** :
    ```bash
    poetry install
    ```
 
-4. **Activer l'environnement virtuel Poetry** :
-   ```bash
-   poetry shell
-   ```
-
 ## Utilisation
 
-### Démarrer l'API avec Docker
+### Démarrer l'API et l'Interface Utilisateur avec Docker
 
 1. Construire et lancer les conteneurs :
    ```bash
-   docker-compose up --build
+   docker-compose up -d
    ```
 2. Accéder à l'API via Swagger :
-   - URL : `http://127.0.0.1:8000/docs`
+   - URL : `http://localhost:8000/docs`
 
-### Lancer l'Interface Utilisateur
+3. Accéder à l'interface via Swagger :
+   - URL : `http://localhost:8510`
 
-1. Démarrer l'application Streamlit :
-   ```bash
-   streamlit run src/interface/interface.py
-   ```
-2. Accéder à l'interface via votre navigateur :
-   - URL : `http://localhost:8501`
-
-### Entraînement et Évaluation des Modèles
+### Entraînement, Évaluation et Mise en production des Modèles
 
 1. Exécuter le script d'entraînement :
    ```bash
    poetry run python src/ml/train.py
    ```
-2. Les modèles et métriques seront journalisés dans MLflow.
-   - URL pour accéder à l'interface MLflow : `http://127.0.0.1:5000`
+2. Le modèle et métriques seront journalisés dans MLflow.
+   ```bash
+   poetry run mlflow ui
+   ```
+### Accéder aux expérimentation du notebook experiments
 
+1. Accéder au dossier notebook :
+   ```bash
+   cd notebooks
+   ```
+2. Accéder au dossier notebook :
+   ```bash
+   poetry run mlflow ui --backend-store-uri sqlite:///mlflow.db
+   ```
 ### Tests
 
-1. Exécuter les tests avec Pytest :
+1. Exécuter le script d'entraînement :
+   ```bash
+   poetry run python src/ml/train.py
+   ```
+
+2. Exécuter les tests avec Pytest :
    ```bash
    poetry run pytest
    ```
@@ -134,19 +136,3 @@ Listez les contributeurs ici.
 ## Licence
 
 Ce projet est sous licence [MIT](LICENSE).
-
-## Notes
-
-Pour toute question ou problème, veuillez ouvrir une issue dans le dépôt GitHub.
-
-
-# projet-mlops-imo-bm
-uvicorn fichier:app --reload
-
-poetry run mlflow ui --backend-store-uri sqlite:///mlflow.db
-
-poetry run pytest  
-
-http://127.0.0.1:8000/redoc
-
-http://127.0.0.1:8000/docs
