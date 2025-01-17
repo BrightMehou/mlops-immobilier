@@ -46,6 +46,7 @@ Voici la structure du projet :
 
 5. **Docker et Orchestration** :
    - Un fichier Dockerfile permet de containeriser l'API.
+   - Un autre fichier Dockerfile permet de containeriser l'interface utilisateur.
    - Le fichier docker-compose.yml facilite l'orchestration des services (API, MLflow, etc.).
 
 6. **Gestion des Dépendances avec Poetry** :
@@ -82,8 +83,8 @@ Voici la structure du projet :
 2. Accéder à l'API via Swagger :
    - URL : `http://localhost:8000/docs`
 
-3. Accéder à l'interface via Swagger :
-   - URL : `http://localhost:8510`
+3. Accéder à l'interface:
+   - URL : `http://localhost:8501`
 
 ### Entraînement, Évaluation et Mise en production des Modèles
 
@@ -105,6 +106,8 @@ Voici la structure du projet :
    ```bash
    poetry run mlflow ui --backend-store-uri sqlite:///mlflow.db
    ```
+3. Accéder à l'interface UI de mlfow:
+   - url : `http://localhost:5000`
 ### Tests
 
 1. Exécuter le script d'entraînement :
