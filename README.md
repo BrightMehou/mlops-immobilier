@@ -2,23 +2,23 @@
 
 Ce projet est une application de machine learning permettant de prédire les prix des logements en Californie à partir de différentes caractéristiques. Il comprend une API FastAPI, une interface utilisateur Streamlit, et des scripts pour l'entraînement et l'évaluation de modèles de machine learning.
 
-## Structure du Projet
+## 🗂️ Structure du Projet
 
 Voici la structure du projet :
 
 ```
-├───.github
-│   └───workflows         # Fichiers pour l'intégration et déploiement continus (CI/CD)
+├───.github/
+│   └───workflows/         # Fichiers pour l'intégration et déploiement continus (CI/CD)
 ├───notebooks             # Notebooks Jupyter pour l'exploration et les analyses préliminaires
 │   ├───Analyse_des_features    # Analyse de l'importance des caractéristiques avec SHAP
 │   ├───Analyse_exploratoire    # Analyse exploratoire des données
 │   ├───Data_drift_detection    # Pour détecter d'éventuelle data_drift
 │   ├───Experimentations        # Tests et sélection du meilleur modèle à mettre en production
-├───src                   # Code source du projet
-│   ├───api               # API construite avec FastAPI (fichier app.py)
-│   ├───interface         # Interface utilisateur Streamlit (fichier interface.py)
-│   ├───ml                # Scripts pour l'entraînement et l'évaluation des modèles (fichier train.py)
-├───tests                 # Tests unitaires et d'intégration
+├───src/                   # Code source du projet
+│   ├───api/               # API construite avec FastAPI (fichier app.py)
+│   ├───interface/         # Interface utilisateur Streamlit (fichier interface.py)
+│   ├───ml/                # Scripts pour l'entraînement et l'évaluation des modèles (fichier train.py)
+├───tests/                 # Tests unitaires et d'intégration
 ├───Dockerfile            # Fichier Docker pour containeriser l'API
 ├───docker-compose.yml    # Fichier Compose pour orchestrer les services
 └───pyproject.toml        # Fichier de configuration pour Poetry
@@ -37,6 +37,7 @@ Voici la structure du projet :
    - **Analyse_des_features** : Utilisation de SHAP pour analyser l'importance des caractéristiques dans les prédictions.
    - **Analyse_exploratoire** : Exploration des données pour comprendre leur structure et identifier des tendances.
    - **Experimentations** : Création et évaluation de plusieurs modèles, avec journalisation des résultats dans MLflow pour sélectionner le meilleur modèle.
+   - **data_drift_detection** : Utilisation de Evidently AI pour la détection de drift de données. 
 
 4. **Scripts de Machine Learning** :
    - **train.py** : Industrialise le modèle pour la production en l'enregistrant dans le registre de modèles MLflow.
@@ -69,7 +70,7 @@ Voici la structure du projet :
 
 3. **Installer les dépendances** :
    ```bash
-   poetry install
+   poetry install --no-root
    ```
 
 ## Utilisation
@@ -102,7 +103,7 @@ Voici la structure du projet :
    ```bash
    cd notebooks
    ```
-2. Accéder au dossier notebook :
+2. Lancer l'interface UI de mlfow:
    ```bash
    poetry run mlflow ui --backend-store-uri sqlite:///mlflow.db
    ```
@@ -119,19 +120,3 @@ Voici la structure du projet :
    ```bash
    poetry run pytest
    ```
-
-## Technologies Utilisées
-
-- **Python** : Langage principal
-- **FastAPI** : API backend
-- **Streamlit** : Interface utilisateur
-- **scikit-learn** : Entraînement et évaluation des modèles
-- **MLflow** : Suivi des expériences et journalisation des modèles
-- **Docker** : Containerisation des services
-- **docker-compose** : Orchestration des conteneurs
-- **Poetry** : Gestion des dépendances et des environnements
-- **Pytest** : Framework de tests
-
-## Licence
-
-Ce projet est sous licence [MIT](LICENSE).
