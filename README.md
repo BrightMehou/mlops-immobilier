@@ -8,17 +8,13 @@ Voici la structure du projet :
 
 ```
 ├───.github/
-│   └───workflows/         # Fichiers pour l'intégration et déploiement continus (CI/CD)
-├───notebooks             # Notebooks Jupyter pour l'exploration et les analyses préliminaires
-│   ├───Analyse_des_features    # Analyse de l'importance des caractéristiques avec SHAP
-│   ├───Analyse_exploratoire    # Analyse exploratoire des données
-│   ├───Data_drift_detection    # Pour détecter d'éventuelle data_drift
-│   ├───Experimentations        # Tests et sélection du meilleur modèle à mettre en production
-├───src/                   # Code source du projet
-│   ├───api/               # API construite avec FastAPI (fichier app.py)
-│   ├───interface/         # Interface utilisateur Streamlit (fichier interface.py)
-│   ├───ml/                # Scripts pour l'entraînement et l'évaluation des modèles (fichier train.py)
-├───tests/                 # Tests unitaires et d'intégration
+│   └───workflows/        # Fichiers pour l'intégration continue
+├───notebooks/            # Notebooks Jupyter pour l'exploration et les analyses préliminaires
+├───src/                  # Code source du projet
+│   ├───api/              # API construite avec FastAPI (fichier app.py)
+│   ├───interface/        # Interface utilisateur Streamlit (fichier interface.py)
+│   ├───ml/               # Scripts pour l'entraînement et l'évaluation des modèles (fichier train.py)
+├───tests/                # Tests unitaires et d'intégration
 ├───Dockerfile            # Fichier Docker pour containeriser l'API
 ├───docker-compose.yml    # Fichier Compose pour orchestrer les services
 └───pyproject.toml        # Fichier de configuration pour Poetry
@@ -50,14 +46,7 @@ Voici la structure du projet :
    - Un autre fichier Dockerfile permet de containeriser l'interface utilisateur.
    - Le fichier docker-compose.yml facilite l'orchestration des services (API, MLflow, etc.).
 
-6. **Gestion des Dépendances avec Poetry** :
-   - Utilisation de Poetry pour gérer les dépendances et les scripts.
-
-7. **Tests Unitaires** :
-   - Couverture des fonctions critiques, y compris l'entraînement, l'évaluation, et les points de terminaison de l'API.
-
-
-## Installation
+## 📥 Installation
 
 1. **Cloner le répertoire** :
    ```bash
