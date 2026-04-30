@@ -4,30 +4,15 @@ Elle charge le modèle et son explainer SHAP, puis expose des endpoints pour eff
 et interpréter les contributions des variables.
 """
 
-from typing import Any
+from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator
 
 import mlflow
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from mlflow.tracking import MlflowClient
 from pydantic import BaseModel
-
-app = FastAPI(
-    title="Prédiction des prix des logements en Californie",
-    description="API simple pour prédire les prix des logements en Californie avec SHAP values",
-    version="0.3.0",
-)
-
-
-class InputFeatures(BaseModel):
-    medinc: float
-    houseage: float
-    averooms: float
-    avebedrms: float
-    population: float
-    aveoccup: float
-    latitude: float
-    longitude: float
 
 
 def get_latest_run_id(model_name: str = "Production-model") -> str:
@@ -48,12 +33,41 @@ def get_latest_run_id(model_name: str = "Production-model") -> str:
     return latest_version.run_id
 
 
-RUN_ID: str = get_latest_run_id("Production-model")
-MODEL_URI: str = f"runs:/{RUN_ID}/model"
-EXPLAINER_URI: str = f"runs:/{RUN_ID}/explainer"
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Gestionnaire de cycle de vie pour charger et décharger le modèle au démarrage/arrêt."""
 
-MODEL = mlflow.pyfunc.load_model(MODEL_URI)
-EXPLAINER = mlflow.pyfunc.load_model(EXPLAINER_URI)
+    RUN_ID = get_latest_run_id("Production-model")
+    MODEL_URI = f"runs:/{RUN_ID}/model"
+    EXPLAINER_URI = f"runs:/{RUN_ID}/explainer"
+
+    app.state.model = mlflow.pyfunc.load_model(MODEL_URI)
+    app.state.explainer = mlflow.pyfunc.load_model(EXPLAINER_URI)
+
+    yield
+
+    del app.state.model
+    del app.state.explainer
+    print("🔄 Modèle et explainer déchargés")
+
+
+app = FastAPI(
+    title="Prédiction des prix des logements en Californie",
+    description="API simple pour prédire les prix des logements en Californie avec SHAP values",
+    version="0.4.0",
+    lifespan=lifespan,
+)
+
+
+class InputFeatures(BaseModel):
+    MedInc: float
+    HouseAge: float
+    AveRooms: float
+    AveBedrms: float
+    Population: float
+    AveOccup: float
+    Latitude: float
+    Longitude: float
 
 
 @app.get("/")
@@ -61,12 +75,36 @@ async def root() -> dict[str, str]:
     return {"msg": "API de prédiction des prix des logements opérationnelle ✅"}
 
 
-@app.post("/predict")
-def predict(input_data: InputFeatures) -> dict[str, list[Any]]:
+@app.get("/health")
+async def health_check(request: Request) -> JSONResponse:
     """
-    Prédit le prix d’un logement en Californie à partir de ses caractéristiques.
+    Vérifie l'état de santé de l'API et du modèle.
 
-    Cette fonction reçoit les données d’entrée sous forme d’un objet `InputFeatures`,
+    Retourne :
+    -------
+    JSONResponse
+        Un dictionnaire contenant :
+        - "status" : état de l'API ("healthy" ou "unhealthy")
+    """
+    model = getattr(request.app.state, "model", None)
+    explainer = getattr(request.app.state, "explainer", None)
+    model_loaded = model is not None and explainer is not None
+    status = "healthy" if model_loaded else "unhealthy"
+
+    return JSONResponse(
+        status_code=200 if model_loaded else 503,
+        content={
+            "status": status,
+        },
+    )
+
+
+@app.post("/predict")
+def predict(request: Request, input_data: InputFeatures) -> dict[str, list[Any]]:
+    """
+    Prédit le prix d'un logement en Californie à partir de ses caractéristiques.
+
+    Cette fonction reçoit les données d'entrée sous forme d'un objet `InputFeatures`,
     les transforme en DataFrame compatible avec le modèle MLflow, puis retourne :
     - La prédiction du prix du logement
     - Les valeurs SHAP associées pour interpréter la contribution de chaque feature
@@ -74,15 +112,15 @@ def predict(input_data: InputFeatures) -> dict[str, list[Any]]:
     Paramètres :
     ----------
     input_data : InputFeatures
-        Données d’entrée contenant les caractéristiques du logement :
-        - medinc : revenu médian
-        - houseage : âge moyen des habitations
-        - averooms : nombre moyen de pièces
-        - avebedrms : nombre moyen de chambres
-        - population : population du quartier
-        - aveoccup : taux d’occupation moyen
-        - latitude : latitude géographique
-        - longitude : longitude géographique
+        Données d'entrée contenant les caractéristiques du logement :
+        - MedInc : revenu médian
+        - HouseAge : âge moyen des habitations
+        - AveRooms : nombre moyen de pièces
+        - AveBedrms : nombre moyen de chambres
+        - Population : population du quartier
+        - AveOccup : taux d'occupation moyen
+        - Latitude : latitude géographique
+        - Longitude : longitude géographique
 
     Retour :
     -------
@@ -91,23 +129,18 @@ def predict(input_data: InputFeatures) -> dict[str, list[Any]]:
         - "prediction" : liste avec le prix prédit
         - "shap_values" : liste des valeurs SHAP pour chaque feature
     """
+    model = getattr(request.app.state, "model", None)
+    explainer = getattr(request.app.state, "explainer", None)
 
-    df = pd.DataFrame(
-        [
-            {
-                "MedInc": input_data.medinc,
-                "HouseAge": input_data.houseage,
-                "AveRooms": input_data.averooms,
-                "AveBedrms": input_data.avebedrms,
-                "Population": input_data.population,
-                "AveOccup": input_data.aveoccup,
-                "Latitude": input_data.latitude,
-                "Longitude": input_data.longitude,
-            }
-        ]
-    )
+    if model is None or explainer is None:
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Model not loaded"},
+        )
 
-    prediction = MODEL.predict(df)
-    shap_values = EXPLAINER.predict(df)
+    df = pd.DataFrame([input_data.model_dump()])
+
+    prediction = model.predict(df)
+    shap_values = explainer.predict(df)
 
     return {"prediction": prediction.tolist(), "shap_values": shap_values.tolist()}

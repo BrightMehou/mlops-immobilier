@@ -50,7 +50,7 @@ caractéristique donnée, en moyenne ?*
             image = Image.open(filepath)
             filename = os.path.basename(filepath).replace(".png", "")
             st.subheader(f"📈 {filename}")
-            st.image(image, use_container_width=True)
+            st.image(image, width="stretch")
             st.divider()
 
     st.markdown(
@@ -148,7 +148,7 @@ caractéristique (rouge = élevée, bleue = faible).
     filepath_beeswarm = os.path.join("data", "feature_analysis", "beeswarm_plot.png")
     try:
         image_beeswarm = Image.open(filepath_beeswarm)
-        st.image(image_beeswarm, use_container_width=True)
+        st.image(image_beeswarm, width="stretch")
     except FileNotFoundError:
         st.warning(f"⚠️ Image introuvable : {filepath_beeswarm}")
 
@@ -188,7 +188,7 @@ effets non-linéaires et des interactions que la dépendance partielle ne captur
             image = Image.open(filepath)
             filename = os.path.basename(filepath).replace(".png", "")
             st.subheader(f"📈 {filename}")
-            st.image(image, use_container_width=True)
+            st.image(image, width="stretch")
             st.divider()
 
 
@@ -208,7 +208,7 @@ une mesure synthétique de l'importance de chaque caractéristique à l'échelle
     try:
         image_bar = Image.open(filepath_bar)
         st.subheader("📊 Importance moyenne (|SHAP| moyen)")
-        st.image(image_bar, use_container_width=True)
+        st.image(image_bar, width="stretch")
         st.divider()
     except FileNotFoundError:
         st.warning(f"⚠️ Image introuvable : {filepath_bar}")
@@ -230,7 +230,7 @@ majeure des trois premières caractéristiques et la contribution plus marginale
     try:
         image_bar_abs_max = Image.open(filepath_bar_abs_max)
         st.subheader("📊 Importance maximale (|SHAP| max)")
-        st.image(image_bar_abs_max, use_container_width=True)
+        st.image(image_bar_abs_max, width="stretch")
         st.divider()
     except FileNotFoundError:
         st.warning(f"⚠️ Image introuvable : {filepath_bar_abs_max}")

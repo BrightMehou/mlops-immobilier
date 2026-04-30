@@ -109,14 +109,14 @@ with col2:
 bouton = st.button("📈 Prédire")
 if bouton:
     input_data: dict[str, float] = {
-        "medinc": medinc,
-        "houseage": houseage,
-        "averooms": averooms,
-        "avebedrms": avebedrms,
-        "population": population,
-        "aveoccup": aveoccup,
-        "latitude": latitude,
-        "longitude": longitude,
+        "MedInc": medinc,
+        "HouseAge": houseage,
+        "AveRooms": averooms,
+        "AveBedrms": avebedrms,
+        "Population": population,
+        "AveOccup": aveoccup,
+        "Latitude": latitude,
+        "Longitude": longitude,
     }
     logger.info("Formulaire soumis par l'utilisateur.")
     prediction_text, shap_values = model_prediction(input_data)

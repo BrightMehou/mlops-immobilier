@@ -1,5 +1,3 @@
-test.py
-
 mlruns/
 mlflow.db
 .vscode/

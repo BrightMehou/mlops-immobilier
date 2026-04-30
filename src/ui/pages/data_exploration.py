@@ -140,7 +140,7 @@ with tab3:
 
     feature = st.selectbox("Choisissez une variable :", data.columns)
     fig = px.histogram(data, x=feature, nbins=30, title=f"Histogramme de {feature}")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     st.markdown(
         """
@@ -176,7 +176,7 @@ with tab4:
         colorscale="Viridis",
     )
     fig.update_layout(title="Matrice de corrélation linéaire", height=700, width=700)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     st.markdown(
         """
@@ -254,7 +254,7 @@ with tab5:
     else:
         fig = px.scatter(data, x=x_axis, y=y_axis, height=600)
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     st.markdown(
         """
@@ -304,7 +304,7 @@ et la taille des cercles sont liées à la valeur médiane des maisons dans chaq
         height=600,
         mapbox_style="open-street-map",
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     st.markdown(
         """
