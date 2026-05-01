@@ -22,9 +22,6 @@ st.set_page_config(
     page_title="California housing prices", page_icon="🏠", layout="wide"
 )
 
-logger.info("Démarrage de l'application Streamlit.")
-
-# Titre principal
 st.title("🏠 Prédiction du prix des logements en Californie")
 st.markdown(
     """
@@ -33,12 +30,9 @@ en fonction de plusieurs caractéristiques socio-démographiques et géographiqu
 """
 )
 
-
-# URL du modèle
 MODEL_URL: str = os.getenv("MODEL_URL", "http://localhost:8000/predict")
 
 
-# Fonction de prédiction
 def model_prediction(input: dict):
     """
     Envoie les données au modèle via une requête POST et retourne la prédiction formatée
@@ -76,34 +70,33 @@ def model_prediction(input: dict):
     return text_output, shap_values
 
 
-# Formulaire utilisateur
 st.subheader("🧾 Entrez les caractéristiques du logement")
 col1, col2 = st.columns(2)
 with col1:
     medinc = st.number_input(
-        "Revenu médian des ménages (en dizaines de milliers de $)",
+        "💰 Revenu médian des ménages (en dizaines de milliers de $)",
         min_value=0.0,
         value=0.0,
     )
     houseage = st.number_input(
-        "Âge moyen des maisons (en années)", min_value=0.0, value=0.0
+        "📅 Âge moyen des maisons (en années)", min_value=0.0, value=0.0
     )
     averooms = st.number_input(
-        "Nombre moyen de pièces par logement", min_value=0.0, value=0.0
+        "🏠 Nombre moyen de pièces par logement", min_value=0.0, value=0.0
     )
     avebedrms = st.number_input(
-        "Nombre moyen de chambres par logement", min_value=0.0, value=0.0
+        "🛏️ Nombre moyen de chambres par logement", min_value=0.0, value=0.0
     )
 with col2:
-    population = st.number_input("Population de la région", min_value=1.0, value=1.0)
+    population = st.number_input("👥 Population de la région", min_value=1.0, value=1.0)
     aveoccup = st.number_input(
-        "Nombre moyen d'occupants par logement", min_value=0.0, value=0.0
+        "👨‍👩‍👧‍👦 Nombre moyen d'occupants par logement", min_value=0.0, value=0.0
     )
     latitude = st.number_input(
-        "Latitude de la région", min_value=31.0, max_value=43.0, value=37.0
+        "📍 Latitude de la région", min_value=31.0, max_value=43.0, value=37.0
     )
     longitude = st.number_input(
-        "Longitude de la région", min_value=-125.0, max_value=-113.0, value=-119.0
+        "🗺️ Longitude de la région", min_value=-125.0, max_value=-113.0, value=-119.0
     )
 
 bouton = st.button("📈 Prédire")
@@ -148,13 +141,3 @@ if bouton:
             title=f"Importance des features {sum(shap_values):,.0f} par rapport au prix de base moyen de 200,000 $",
         )
         st.plotly_chart(fig)
-
-st.markdown("---")
-st.markdown(
-    """
-© 2025 - Application développée avec [Streamlit](https://streamlit.io/) | 
-Construite avec **Python**, **uv**, **Scikit-learn**, **MLflow**, **FastAPI** et **Docker**.
-"""
-)
-
-logger.info("Fin de chargement de la page.")

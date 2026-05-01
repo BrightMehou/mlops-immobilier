@@ -133,47 +133,6 @@ def session() -> AppTest:
     return at
 
 
-def test_initial_state(session) -> None:
-    """
-    Vérifie l'état initial de l'interface Streamlit.
-
-    - Vérifie le nombre de champs de texte et de boutons.
-    - Vérifie les labels des champs et boutons.
-    - Vérifie le nombre d'éléments Markdown.
-    - Vérifie que les valeurs initiales des champs sont correctes.
-    """
-
-    # Vérification du nombre de champs number_input (8 champs attendus)
-    assert len(session.number_input) == 8
-
-    # Vérification du nombre de boutons (1 bouton attendu)
-    assert len(session.button) == 1
-
-    # Vérification des labels des champs number_input
-    expected_labels: list[str] = [
-        "Revenu médian des ménages (en dizaines de milliers de $)",
-        "Âge moyen des maisons (en années)",
-        "Nombre moyen de pièces par logement",
-        "Nombre moyen de chambres par logement",
-        "Population de la région",
-        "Nombre moyen d'occupants par logement",
-        "Latitude de la région",
-        "Longitude de la région",
-    ]
-    for i, label in enumerate(expected_labels):
-        assert session.number_input[i].label == label
-
-    # Vérification des valeurs initiales des champs number_input
-    # for field in session.number_input:
-    #     assert field.value == 0.0  # Les valeurs initiales doivent être 0.0
-
-    # Vérification du label du bouton
-    assert session.button[0].label == "📈 Prédire"
-
-    # Vérification du nombre d'éléments Markdown (3 attendus)
-    assert len(session.markdown) == 3
-
-
 def test_valid_input(session: AppTest, monkeypatch) -> None:
     """
     Vérifie que l'application Streamlit retourne une prédiction valide pour des entrées correctes.

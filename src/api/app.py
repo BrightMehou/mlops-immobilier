@@ -12,7 +12,7 @@ import pandas as pd
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from mlflow.tracking import MlflowClient
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 def get_latest_run_id(model_name: str = "Production-model") -> str:
@@ -60,14 +60,14 @@ app = FastAPI(
 
 
 class InputFeatures(BaseModel):
-    MedInc: float
-    HouseAge: float
-    AveRooms: float
-    AveBedrms: float
-    Population: float
-    AveOccup: float
-    Latitude: float
-    Longitude: float
+    MedInc: float = Field(ge=0)
+    HouseAge: float = Field(ge=0)
+    AveRooms: float = Field(ge=0)
+    AveBedrms: float = Field(ge=0)
+    Population: float = Field(ge=1)
+    AveOccup: float = Field(ge=0)
+    Latitude: float = Field(ge=31, le=43)
+    Longitude: float = Field(ge=-125, le=-113)
 
 
 @app.get("/")
