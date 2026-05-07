@@ -4,6 +4,7 @@ Elle charge le modèle et son explainer SHAP, puis expose des endpoints pour eff
 et interpréter les contributions des variables.
 """
 
+import logging
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 
@@ -13,6 +14,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from mlflow.tracking import MlflowClient
 from pydantic import BaseModel, Field
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 def get_latest_run_id(model_name: str = "Production-model") -> str:
@@ -26,11 +32,17 @@ def get_latest_run_id(model_name: str = "Production-model") -> str:
         str: Identifiant de l'exécution (run_id).
     """
     client = MlflowClient()
-    versions = client.get_latest_versions(model_name, stages=["None"])
-    if not versions:
-        raise ValueError(f"No versions found for model '{model_name}'")
-    latest_version = max(versions, key=lambda v: int(v.version))
-    return latest_version.run_id
+    try:
+        versions = client.search_model_versions(f"name='{model_name}'")
+        if not versions:
+            raise ValueError(f"No versions found for model '{model_name}'")
+        latest_version = max(versions, key=lambda v: int(v.version))
+        return latest_version.run_id
+    except Exception as e:
+        logger.error(
+            f"Error occurred while fetching latest run ID for model '{model_name}': {e}"
+        )
+        raise
 
 
 @asynccontextmanager
@@ -48,7 +60,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     del app.state.model
     del app.state.explainer
-    print("🔄 Modèle et explainer déchargés")
+    logger.info("🔄 Modèle et explainer déchargés")
 
 
 app = FastAPI(
@@ -133,6 +145,7 @@ def predict(request: Request, input_data: InputFeatures) -> dict[str, list[Any]]
     explainer = getattr(request.app.state, "explainer", None)
 
     if model is None or explainer is None:
+        logger.warning("Model or explainer not loaded")
         return JSONResponse(
             status_code=503,
             content={"detail": "Model not loaded"},

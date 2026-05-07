@@ -7,10 +7,10 @@ requires-python = ">=3.13"
 dependencies = [
     "evidently>=0.7.17",
     "fastapi[standard]>=0.135.1",
-    "mlflow>=3.10.0",
+    "mlflow>=3.11.0",
     "scikit-learn>=1.8.0",
     "shap>=0.48.0",
-    "streamlit>=1.55.0",
+    "streamlit>=1.57.0",
 ]
 
 [dependency-groups]

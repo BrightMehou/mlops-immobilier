@@ -12,7 +12,7 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from src.api.app import app
+from src.api.app import app, get_latest_run_id
 
 
 @pytest.fixture
@@ -80,6 +80,29 @@ def test_valid_prediction(client: TestClient) -> None:
     if response.status_code == 200:
         assert "prediction" in response.json()
         assert isinstance(response.json()["prediction"][0], float)
+
+
+def test_get_latest_run_id_uses_search_model_versions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Vérifie que get_latest_run_id interroge search_model_versions et retourne le run_id le plus récent."""
+
+    class DummyVersion:
+        def __init__(self, version: str, run_id: str) -> None:
+            self.version = version
+            self.run_id = run_id
+
+    class DummyClient:
+        def __init__(self) -> None:
+            pass
+
+        def search_model_versions(self, filter_string: str):
+            assert filter_string == "name='Production-model'"
+            return [DummyVersion("1", "run_1"), DummyVersion("2", "run_2")]
+
+    monkeypatch.setattr("src.api.app.MlflowClient", DummyClient)
+
+    assert get_latest_run_id("Production-model") == "run_2"
 
 
 @pytest.mark.parametrize(
