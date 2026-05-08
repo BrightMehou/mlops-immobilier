@@ -289,7 +289,6 @@ et la taille des cercles sont liées à la valeur médiane des maisons dans chaq
         lat="Latitude",
         lon="Longitude",
         color="MedHouseVal",
-        size="MedHouseVal",
         hover_data=[
             "MedInc",
             "HouseAge",
