@@ -50,7 +50,7 @@ Voici la structure du projet :
 
 1. Construire et lancer les conteneurs :
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 2. Accéder à l'API via Swagger :
    - URL : `http://localhost:8000/docs`

@@ -41,6 +41,13 @@ def test_api_is_running(client: TestClient) -> None:
     }
 
 
+def test_get_predictions(client: TestClient) -> None:
+    """Vérifie que GET /predictions retourne une liste."""
+    response = client.get("/predictions")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
 def test_health_check(client: TestClient) -> None:
     """
     Vérifie que le point de terminaison "/health" retourne le bon statut.
