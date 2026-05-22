@@ -36,3 +36,4 @@ README.md
 
 **/.ruff_cache
 **/.github
+data/monitoring.db

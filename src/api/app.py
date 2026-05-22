@@ -5,19 +5,17 @@ et interpréter les contributions des variables.
 """
 
 import logging
-import sqlite3
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import Any, AsyncGenerator
 
 import mlflow
 import pandas as pd
-from fastapi import FastAPI, Request
+from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.responses import JSONResponse
 from mlflow.tracking import MlflowClient
 from pydantic import BaseModel, Field
 
-DB_PATH = Path("data/inference_logs.sqlite")
+from src.api.db import MonitoringDB
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -53,17 +51,8 @@ def get_latest_run_id(model_name: str = "Production-model") -> str:
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Gestionnaire de cycle de vie pour charger et décharger le modèle au démarrage/arrêt."""
 
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    app.state.db = sqlite3.connect(DB_PATH, check_same_thread=False)
-    app.state.db.row_factory = sqlite3.Row
-    app.state.db.execute("""
-        CREATE TABLE IF NOT EXISTS prediction_requests (
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            MedInc REAL, HouseAge REAL, AveRooms REAL, AveBedrms REAL,
-            Population REAL, AveOccup REAL, Latitude REAL, Longitude REAL,
-            prediction REAL
-        )
-    """)
+    app.state.db = MonitoringDB()
+    app.state.db.connect()
 
     RUN_ID = get_latest_run_id("Production-model")
     MODEL_URI = f"runs:/{RUN_ID}/model"
@@ -84,7 +73,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title="Prédiction des prix des logements en Californie",
     description="API simple pour prédire les prix des logements en Californie avec SHAP values",
-    version="0.4.0",
+    version="0.5.0",
     lifespan=lifespan,
 )
 
@@ -132,17 +121,18 @@ async def health_check(request: Request) -> JSONResponse:
 @app.get("/predictions")
 def get_predictions(request: Request) -> list[dict[str, Any]]:
     """Retourne toutes les requêtes enregistrées en base."""
-    db = getattr(request.app.state, "db", None)
+    db: MonitoringDB | None = getattr(request.app.state, "db", None)
     if db is None:
         return []
-    rows = db.execute(
-        "SELECT * FROM prediction_requests ORDER BY created_at"
-    ).fetchall()
-    return [dict(row) for row in rows]
+    return db.get_all_predictions()
 
 
 @app.post("/predict")
-def predict(request: Request, input_data: InputFeatures) -> dict[str, list[Any]]:
+def predict(
+    request: Request,
+    input_data: InputFeatures,
+    background_tasks: BackgroundTasks,
+) -> dict[str, list[Any]]:
     """
     Prédit le prix d'un logement en Californie à partir de ses caractéristiques.
 
@@ -185,26 +175,12 @@ def predict(request: Request, input_data: InputFeatures) -> dict[str, list[Any]]
 
     prediction = model.predict(df)
     shap_values = explainer.predict(df)
-    f = input_data.model_dump()
-    request.app.state.db.execute(
-        """
-        INSERT INTO prediction_requests
-        (MedInc, HouseAge, AveRooms, AveBedrms, Population, AveOccup, Latitude, Longitude, prediction)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        [
-            f["MedInc"],
-            f["HouseAge"],
-            f["AveRooms"],
-            f["AveBedrms"],
-            f["Population"],
-            f["AveOccup"],
-            f["Latitude"],
-            f["Longitude"],
-            float(prediction[0]),
-        ],
+    db: MonitoringDB = request.app.state.db
+    background_tasks.add_task(
+        db.save_prediction_request,
+        input_data.model_dump(),
+        float(prediction[0]),
     )
-    request.app.state.db.commit()
 
     return {
         "prediction": prediction.tolist(),
