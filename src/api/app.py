@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 from mlflow.tracking import MlflowClient
 from pydantic import BaseModel, Field
 
-from src.api.db import get_all_predictions, save_prediction_request
+from src.api.db import get_all_predictions, init_db_from_csv, save_prediction_request
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -49,7 +49,10 @@ def get_latest_run_id(model_name: str = "Production-model") -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Charge et décharge le modèle au démarrage et à l’arrêt."""
+    """Charge la base monitoring, le modèle et l’explainer au démarrage."""
+
+    init_db_from_csv()
+    logger.info("Base monitoring initialisée")
 
     RUN_ID = get_latest_run_id("Production-model")
     MODEL_URI = f"runs:/{RUN_ID}/model"
