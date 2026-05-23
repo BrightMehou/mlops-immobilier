@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 from mlflow.tracking import MlflowClient
 from pydantic import BaseModel, Field
 
-from src.api.db import MonitoringDB
+from src.api.db import get_all_predictions, save_prediction_request
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -49,10 +49,7 @@ def get_latest_run_id(model_name: str = "Production-model") -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Gestionnaire de cycle de vie pour charger et décharger le modèle au démarrage/arrêt."""
-
-    app.state.db = MonitoringDB()
-    app.state.db.connect()
+    """Charge et décharge le modèle au démarrage et à l’arrêt."""
 
     RUN_ID = get_latest_run_id("Production-model")
     MODEL_URI = f"runs:/{RUN_ID}/model"
@@ -63,10 +60,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     yield
 
-    app.state.db.close()
     del app.state.model
     del app.state.explainer
-    del app.state.db
     logger.info("🔄 Modèle et explainer déchargés")
 
 
@@ -119,12 +114,9 @@ async def health_check(request: Request) -> JSONResponse:
 
 
 @app.get("/predictions")
-def get_predictions(request: Request) -> list[dict[str, Any]]:
+def get_predictions() -> list[dict[str, Any]]:
     """Retourne toutes les requêtes enregistrées en base."""
-    db: MonitoringDB | None = getattr(request.app.state, "db", None)
-    if db is None:
-        return []
-    return db.get_all_predictions()
+    return get_all_predictions()
 
 
 @app.post("/predict")
@@ -175,9 +167,8 @@ def predict(
 
     prediction = model.predict(df)
     shap_values = explainer.predict(df)
-    db: MonitoringDB = request.app.state.db
     background_tasks.add_task(
-        db.save_prediction_request,
+        save_prediction_request,
         input_data.model_dump(),
         float(prediction[0]),
     )
