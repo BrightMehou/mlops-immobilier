@@ -17,6 +17,6 @@ services:
     depends_on:
       - api
     environment:
-      - MODEL_URL=http://api:8000/predict
+      - API_BASE_URL=http://api:8000
       
   

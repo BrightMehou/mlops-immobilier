@@ -72,7 +72,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title="Prédiction des prix des logements en Californie",
     description="API simple pour prédire les prix des logements en Californie avec SHAP values",
-    version="0.5.0",
+    version="0.6.0",
     lifespan=lifespan,
 )
 

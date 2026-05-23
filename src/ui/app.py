@@ -30,7 +30,7 @@ en fonction de plusieurs caractéristiques socio-démographiques et géographiqu
 """
 )
 
-MODEL_URL: str = os.getenv("MODEL_URL", "http://localhost:8000/predict")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 
 def model_prediction(input: dict):
@@ -47,7 +47,7 @@ def model_prediction(input: dict):
 
     logger.info(f"Envoi des données au modèle : {input}")
     try:
-        response = requests.post(MODEL_URL, json=input)
+        response = requests.post(f"{API_BASE_URL}/predict", json=input)
     except requests.exceptions.RequestException as e:
         logger.error(f"Erreur de connexion au modèle : {e}")
         return "❌ Erreur : impossible de contacter le modèle.", None
