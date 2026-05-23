@@ -10,12 +10,13 @@ from typing import Any, AsyncGenerator
 
 import mlflow
 import pandas as pd
-from fastapi import BackgroundTasks, FastAPI, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from mlflow.tracking import MlflowClient
 from pydantic import BaseModel, Field
 
 from src.api.db import get_all_predictions, init_db_from_csv, save_prediction_request
+from src.ml.drift_dectection import detect_drift, reference_data
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -120,6 +121,18 @@ async def health_check(request: Request) -> JSONResponse:
 def get_predictions() -> list[dict[str, Any]]:
     """Retourne toutes les requêtes enregistrées en base."""
     return get_all_predictions()
+
+
+@app.get("/drift")
+def get_drift_report() -> dict[str, Any]:
+    """Rapport de dérive : données d'entraînement vs requêtes en base."""
+    rows = get_all_predictions()
+    if not rows:
+        raise HTTPException(status_code=404, detail="Aucune donnée en base.")
+
+    cols = list(InputFeatures.model_fields.keys())
+    current = pd.DataFrame(rows)[cols]
+    return detect_drift(reference_data(), current)
 
 
 @app.post("/predict")

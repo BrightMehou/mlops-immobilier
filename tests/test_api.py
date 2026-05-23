@@ -48,6 +48,43 @@ def test_get_predictions(client: TestClient) -> None:
     assert isinstance(response.json(), list)
 
 
+def test_get_drift_report(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Vérifie que GET /drift retourne du JSON."""
+    monkeypatch.setattr(
+        "src.api.app.get_all_predictions",
+        lambda: [
+            {
+                "MedInc": 8.3,
+                "HouseAge": 41.0,
+                "AveRooms": 6.9,
+                "AveBedrms": 1.0,
+                "Population": 322.0,
+                "AveOccup": 2.5,
+                "Latitude": 37.88,
+                "Longitude": -122.23,
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        "src.api.app.detect_drift", lambda ref, cur: {"metrics": [], "tests": []}
+    )
+    monkeypatch.setattr("src.api.app.reference_data", lambda: None)
+
+    response = client.get("/drift")
+    assert response.status_code == 200
+    assert response.json() == {"metrics": [], "tests": []}
+
+
+def test_get_drift_report_empty_db(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Vérifie que GET /drift renvoie 404 si la base est vide."""
+    monkeypatch.setattr("src.api.app.get_all_predictions", lambda: [])
+
+    response = client.get("/drift")
+    assert response.status_code == 404
+
+
 def test_health_check(client: TestClient) -> None:
     """
     Vérifie que le point de terminaison "/health" retourne le bon statut.
