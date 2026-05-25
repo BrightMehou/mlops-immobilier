@@ -1,66 +1,102 @@
-# Projet de Prédiction des Prix des Logements en Californie
+# Prédiction des prix des logements en Californie
 
-Ce projet est une application de machine learning permettant de prédire les prix des logements en Californie à partir de différentes caractéristiques. Il comprend une API FastAPI, une interface utilisateur Streamlit, et des scripts pour l'entraînement et l'évaluation de modèles de machine learning.
-
-## 🗂️ Structure du Projet
-
-Voici la structure du projet :
-
-```
-├───.github/
-│   └───workflows/        # Fichiers pour l'intégration continue
-├───data                  # Data
-├───notebooks/            # Notebooks Jupyter pour les expérimentations
-├───src/                  # Code source du projet
-│   ├───api/              # AppFastAPI
-│   ├───ui/               # Interface utilisateur Streamlit
-│   ├───ml/               # Scripts pour l'entraînement et l'évaluation des modèles
-├───tests/                # Tests unitaires et d'intégration
-├───Dockerfile            # Fichier Docker pour containeriser l'API
-├───docker-compose.yml    # Fichier Compose pour orchestrer les services
-└───pyproject.toml        # Fichier de configuration pour uv et Ruff
-```
+Application de machine learning pour prédire les prix des logements en Californie à partir de caractéristiques socio-démographiques et géographiques. Le projet expose une **API FastAPI** (modèle MLflow + explications SHAP), une **interface Streamlit** multi-pages, d’analyse et de monitoring.
 
 ## Fonctionnalités
 
-1. **API FastAPI** :
-   - Permet de servir un modèle de machine learning pour les prédictions.
-   - Points de terminaison pour les prédictions et la validation des données d'entrée.
+### API FastAPI
 
-2. **Interface Utilisateur Streamlit** :
-   - Permet aux utilisateurs de saisir les caractéristiques d'un logement et de recevoir une prédiction de prix en temps réel.
+Cette API déploie un modèle de machine learning et son explainer SHAP pour prédire des prix et expliquer les résultats en temps réel. Elle stocke chaque requête dans une base SQLite pour suivre l'historique et génère des rapports de drift (via Evidently) pour détecter si les données reçues en production évoluent par rapport à l'entraînement.
 
-3. **Notebooks Jupyter** :
-   - **Experimentations** : Création et évaluation de plusieurs modèles, avec journalisation des résultats dans MLflow pour 
+### Interface Streamlit
 
-4. **Scripts de Machine Learning** :
-   - **train.py** : Industrialise le modèle pour la production en l'enregistrant dans le registre de modèles MLflow.
-   - Entraînement des modèles avec des données de logement en Californie.
-   - Évaluation des modèles à l'aide de métriques telles que le MSE, MAE et R².
-   - Journalisation des modèles et des résultats avec MLflow.
+| Page | Rôle |
+|------|------|
+| **Accueil**| Saisie des caractéristiques d’un logement, prédiction en temps réel, graphique SHAP |
+| **Data exploration** | Exploration du dataset California Housing (stats, corrélations, carte) |
+| **Feature analysis** | Visualisations SHAP et dépendance partielle |
+| **Monitoring** | Historique des prédictions et rapport de drift |
 
-## 📥 Installation et utilisation
+## Structure du projet
 
-1. **Cloner le répertoire** :
+```
+├── .github/workflows/     # CI : tests Python et build Docker
+├── data/
+│   ├── feature_analysis/  # Résultats des anaylses de features
+│   └── monitoring/        # Données et base SQLite de monitoring
+├── notebooks/             # Notebook d’expérimentation
+├── src/
+│   ├── api/               # FastAPI, persistance SQLite
+│   ├── ml/                # Entraînement, drift, analyse des features
+│   └── ui/                # Streamlit (accueil + pages)
+├── tests/                 # Tests API, base de données et UI
+├── docker-compose.yaml
+├── Dockerfile
+└── pyproject.toml         # Dépendances (uv) et configuration Ruff
+```
+
+## Prérequis
+
+- [Python](https://www.python.org/) ≥ 3.13
+- [uv](https://docs.astral.sh/uv/) (gestionnaire de paquets)
+- [Docker](https://www.docker.com/) et Docker Compose (optionnel, pour lancer API + UI)
+
+## Installation
+
+```bash
+git clone <url_du_repository>
+cd california-housing-prices
+uv sync
+```
+
+## Utilisation
+
+### Avec Docker (recommandé)
+
+Au démarrage, le conteneur API entraîne le modèle puis lance le serveur :
+
+```bash
+docker compose up -d --build
+```
+
+| Service | URL |
+|---------|-----|
+| API (Swagger) | http://localhost:8000/docs |
+| Interface Streamlit | http://localhost:8501 |
+
+### En local (développement)
+
+1. Entraîner et enregistrer le modèle :
+
    ```bash
-   git clone <url_du_repository>
-   cd <nom_du_repertoire>
+   uv run python src/ml/train.py
    ```
-### Démarrer l'API et l'Interface Utilisateur avec Docker
 
-1. Construire et lancer les conteneurs :
+2. Lancer l’API :
+
    ```bash
-   docker compose up -d
+   uv run uvicorn src.api.app:app --reload --port 8000
    ```
-2. Accéder à l'API via Swagger :
-   - URL : `http://localhost:8000/docs`
 
-3. Accéder à l'interface:
-   - URL : `http://localhost:8501`
+3. Lancer l’interface :
 
-
-4. Seulement pour les dev du projet
    ```bash
-   uv run pre-commit install
-   uv run pre-commit run --all-files
+   uv run streamlit run src/ui/app.py
    ```
+
+4. Lancer les tests :
+
+   ```bash
+   uv run pytest
+   ```
+
+### Qualité de code (développeurs)
+
+```bash
+uv run pre-commit install
+uv run pre-commit run --all-files
+```
+
+## Licence
+
+Voir le fichier [LICENSE](LICENSE).
