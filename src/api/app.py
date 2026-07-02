@@ -66,7 +66,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     del app.state.model
     del app.state.explainer
-    logger.info("🔄 Modèle et explainer déchargés")
+    logger.info("Modèle et explainer déchargés")
 
 
 app = FastAPI(

@@ -27,11 +27,11 @@ OUTPUT_DIR: str = "data/feature_analysis"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
-logger.info("🔍 Génération des graphiques de dépendance partielle SHAP...")
+logger.info("Génération des graphiques de dépendance partielle SHAP...")
 columns = X_train.columns
 
 for col in columns:
-    logger.info(f"📊 Génération du graphique pour la feature : {col}")
+    logger.info(f"Génération du graphique pour la feature : {col}")
     fig, ax = shap.partial_dependence_plot(
         col,
         model.predict,
@@ -48,25 +48,25 @@ for col in columns:
 explainer = shap.Explainer(model.predict, X_test)
 shap_values = explainer(X_test)
 
-logger.info("📊 Génération du graphique beeswarm")
+logger.info("Génération du graphique beeswarm")
 ax = shap.plots.beeswarm(shap_values, show=False)
 filepath = os.path.join(OUTPUT_DIR, "beeswarm_plot.png")
 plt.savefig(filepath, bbox_inches="tight", dpi=150)
 plt.close()
 for col in columns:
-    logger.info(f"📊 Génération du graphique scatter pour la feature : {col}")
+    logger.info(f"Génération du graphique scatter pour la feature : {col}")
     ax = shap.plots.scatter(shap_values[:, col], color=shap_values[:, col], show=False)
     filepath = os.path.join(OUTPUT_DIR, f"scatter_plot_{col}.png")
     plt.savefig(filepath, bbox_inches="tight", dpi=150)
     plt.close()
 
-logger.info("📊 Génération du graphique bar plot")
+logger.info("Génération du graphique bar plot")
 shap.plots.bar(shap_values, max_display=8, show=False)
 filepath = os.path.join(OUTPUT_DIR, "bar_plot.png")
 plt.savefig(filepath, bbox_inches="tight", dpi=150)
 plt.close()
 
-logger.info("📊 Génération du graphique bar plot (valeurs absolues maximales)")
+logger.info("Génération du graphique bar plot (valeurs absolues maximales)")
 shap.plots.bar(shap_values.abs.max(0), max_display=8, show=False)
 filepath = os.path.join(OUTPUT_DIR, "bar_plot_abs_max.png")
 plt.savefig(filepath, bbox_inches="tight", dpi=150)

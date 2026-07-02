@@ -54,7 +54,7 @@ def train() -> None:
         mlflow.sklearn.autolog(registered_model_name=MODEL_NAME)
         model = GradientBoostingRegressor(**MODEL_PARAMS)
         model.fit(X_train, y_train)
-        logger.info("✅ Entraînement du modèle terminé.")
+        logger.info("Entraînement du modèle terminé.")
 
         model_uri: str = f"runs:/{mlflow.active_run().info.run_id}/model"
 
@@ -73,14 +73,14 @@ def train() -> None:
                 "explainer_type": "permutation",
             },
         )
-        logger.info(f"📊 Évaluation terminée. Artifacts : {result.artifacts}")
-        logger.info(f"🔁 Run ID : {mlflow.active_run().info.run_id}")
+        logger.info(f"Évaluation terminée. Artifacts : {result.artifacts}")
+        logger.info(f"Run ID : {mlflow.active_run().info.run_id}")
 
 
 if __name__ == "__main__":
     """
     Point d’entrée du script d’entraînement.
     """
-    logger.info("🚀 Démarrage du script d'entraînement...")
+    logger.info("Démarrage du script d'entraînement...")
     train()
-    logger.info("🏁 Script terminé.")
+    logger.info("Script terminé.")
