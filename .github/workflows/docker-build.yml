@@ -2,22 +2,20 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout du code
-      uses: actions/checkout@v4
-          
-    - name: Construction et démarrage des services avec Docker Compose
-      run: docker compose up -d --build
+      - name: Checkout du code
+        uses: actions/checkout@v4
 
-    - name: Arrêt et nettoyage des services Docker Compose
-      run: docker compose down
+      - name: Construction et démarrage des services avec Docker Compose
+        run: docker compose up -d --build
+
+      - name: Arrêt et nettoyage des services Docker Compose
+        run: docker compose down
