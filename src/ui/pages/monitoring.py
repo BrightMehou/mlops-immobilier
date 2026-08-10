@@ -10,7 +10,8 @@ import requests
 import streamlit as st
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -27,8 +28,8 @@ def fetch_json(path: str) -> Any:
         response = requests.get(url, timeout=5)
         response.raise_for_status()
         return response.json()
-    except requests.RequestException as exc:
-        logger.error("Erreur API %s : %s", url, exc)
+    except requests.RequestException:
+        logger.exception("Erreur API: %s", url)
         st.error(f"❌ Impossible de joindre l'API : {url}")
         return None
 
@@ -71,7 +72,7 @@ if "monitoring_data" not in st.session_state:
 
 st.title("📈 Monitoring des prédictions")
 st.markdown(
-    "Cette page affiche les prédictions les plus récentes, ainsi que le résultat du dernier run de drift."
+    "Cette page affiche les prédictions les plus récentes, ainsi que le résultat du dernier run de drift.",
 )
 
 refresh_clicked = st.button("🔄 Actualiser le monitoring", type="primary")
@@ -88,11 +89,12 @@ if not predictions:
 else:
     predictions_df = pd.DataFrame(predictions)
     predictions_df["created_at"] = pd.to_datetime(
-        predictions_df["created_at"], errors="coerce"
+        predictions_df["created_at"],
+        errors="coerce",
     )
     predictions_df = predictions_df.sort_values("created_at", ascending=False)
     predictions_df["created_at"] = predictions_df["created_at"].dt.strftime(
-        "%Y-%m-%d %H:%M:%S"
+        "%Y-%m-%d %H:%M:%S",
     )
 
     st.subheader("🗂️ Prédictions")
@@ -112,7 +114,8 @@ else:
 
     drift_summary = {
         "DriftedColumnsCount": drift_metrics.get(
-            "DriftedColumnsCount(drift_share=0.5)", {}
+            "DriftedColumnsCount(drift_share=0.5)",
+            {},
         ),
         "Failed tests": sum(1 for test in tests if test.get("status") == "FAIL"),
         "Total tests": len(tests),
@@ -144,6 +147,6 @@ else:
     tests_df = pd.DataFrame(tests)
     tests_df = tests_df[["name", "status", "description"]]
     tests_df["status"] = tests_df["status"].replace(
-        {"SUCCESS": "✅ SUCCESS", "FAIL": "❌ FAIL"}
+        {"SUCCESS": "✅ SUCCESS", "FAIL": "❌ FAIL"},
     )
     st.dataframe(tests_df, width="stretch", hide_index=True)

@@ -1,5 +1,4 @@
-"""
-Suite de tests Pytest pour l’API FastAPI de prédiction des prix des logements.
+"""Suite de tests Pytest pour l’API FastAPI de prédiction des prix des logements.
 Elle vérifie :
 - l’accessibilité de l’API,
 - la validité des prédictions,
@@ -17,18 +16,17 @@ from src.api.app import app, get_latest_run_id
 
 @pytest.fixture
 def client() -> TestClient:
-    """
-    Fixture qui retourne un client de test pour l'application FastAPI.
+    """Fixture qui retourne un client de test pour l'application FastAPI.
 
     Returns:
         TestClient: Client de test pour l'API.
+
     """
     return TestClient(app)
 
 
 def test_api_is_running(client: TestClient) -> None:
-    """
-    Vérifie que le point de terminaison racine ("/") de l'API est accessible.
+    """Vérifie que le point de terminaison racine ("/") de l'API est accessible.
 
     - Envoie une requête GET à "/".
     - Vérifie que le code de statut est 200.
@@ -37,7 +35,7 @@ def test_api_is_running(client: TestClient) -> None:
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {
-        "msg": "API de prédiction des prix des logements opérationnelle ✅"
+        "msg": "API de prédiction des prix des logements opérationnelle",
     }
 
 
@@ -62,11 +60,12 @@ def test_get_drift_report(client: TestClient, monkeypatch: pytest.MonkeyPatch) -
                 "AveOccup": 2.5,
                 "Latitude": 37.88,
                 "Longitude": -122.23,
-            }
+            },
         ],
     )
     monkeypatch.setattr(
-        "src.api.app.detect_drift", lambda ref, cur: {"metrics": [], "tests": []}
+        "src.api.app.detect_drift",
+        lambda ref, cur: {"metrics": [], "tests": []},
     )
     monkeypatch.setattr("src.api.app.reference_data", lambda: None)
 
@@ -76,18 +75,18 @@ def test_get_drift_report(client: TestClient, monkeypatch: pytest.MonkeyPatch) -
 
 
 def test_get_drift_report_empty_db(
-    client: TestClient, monkeypatch: pytest.MonkeyPatch
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Vérifie que GET /drift renvoie 404 si la base est vide."""
-    monkeypatch.setattr("src.api.app.get_all_predictions", lambda: [])
+    monkeypatch.setattr("src.api.app.get_all_predictions", list)
 
     response = client.get("/drift")
     assert response.status_code == 404
 
 
 def test_health_check(client: TestClient) -> None:
-    """
-    Vérifie que le point de terminaison "/health" retourne le bon statut.
+    """Vérifie que le point de terminaison "/health" retourne le bon statut.
 
     - Envoie une requête GET à "/health".
     - Vérifie que le code de statut est 200 ou 503 (si modèle non chargé).
@@ -99,14 +98,12 @@ def test_health_check(client: TestClient) -> None:
 
 
 def test_valid_prediction(client: TestClient) -> None:
-    """
-    Vérifie que l'API retourne une prédiction valide pour un jeu de données correct.
+    """Vérifie que l'API retourne une prédiction valide pour un jeu de données correct.
 
     - Envoie une requête POST avec un payload JSON valide au point de terminaison "/predict".
     - Vérifie que le code de statut est 200 ou 503 (si modèle non chargé en test).
     - Vérifie que la réponse contient une clé "prediction" si le modèle est chargé.
     """
-
     payload = {
         "MedInc": 8.3252,
         "HouseAge": 41.0,
@@ -118,8 +115,7 @@ def test_valid_prediction(client: TestClient) -> None:
         "Longitude": -122.23,
     }
     response = client.post("/predict", json=payload)
-    print(response.json())
-    # Accepte 200 (modèle chargé) ou 503 (modèle non chargé en test)
+
     assert response.status_code in [200, 503]
     if response.status_code == 200:
         assert "prediction" in response.json()
@@ -163,8 +159,7 @@ def test_get_latest_run_id_uses_search_model_versions(
     ],
 )
 def test_missing_field(client: TestClient, missing_field: str) -> None:
-    """
-    Vérifie que l'API retourne une erreur lorsqu'un champ obligatoire est manquant.
+    """Vérifie que l'API retourne une erreur lorsqu'un champ obligatoire est manquant.
 
     - Envoie une requête POST avec un payload JSON auquel un champ est supprimé.
     - Utilise la paramétrisation pour tester différents champs manquants.
@@ -186,7 +181,7 @@ def test_missing_field(client: TestClient, missing_field: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "field,invalid_value",
+    ("field", "invalid_value"),
     [
         ("Longitude", "not_a_float"),
         ("Latitude", "not_a_float"),
@@ -199,8 +194,7 @@ def test_missing_field(client: TestClient, missing_field: str) -> None:
     ],
 )
 def test_invalid_data_type(client: TestClient, field: str, invalid_value: str) -> None:
-    """
-    Vérifie que l'API retourne une erreur lorsqu'un champ contient un type de données invalide.
+    """Vérifie que l'API retourne une erreur lorsqu'un champ contient un type de données invalide.
 
     - Envoie une requête POST avec un payload JSON contenant des types incorrects.
     - Vérifie que le code de statut est 422 (Unprocessable Entity).
@@ -221,7 +215,7 @@ def test_invalid_data_type(client: TestClient, field: str, invalid_value: str) -
 
 
 @pytest.mark.parametrize(
-    "field,value,description",
+    ("field", "value", "description"),
     [
         ("MedInc", -100.0, "revenu médian négatif"),
         ("HouseAge", -50.0, "âge négatif"),
@@ -236,10 +230,12 @@ def test_invalid_data_type(client: TestClient, field: str, invalid_value: str) -
     ],
 )
 def test_out_of_bound_values(
-    client: TestClient, field: str, value: float, description: str
+    client: TestClient,
+    field: str,
+    value: float,
+    description: str,
 ) -> None:
-    """
-    Vérifie que l'API retourne une erreur pour les valeurs hors limites.
+    """Vérifie que l'API retourne une erreur pour les valeurs hors limites.
 
     - Envoie une requête POST avec des valeurs hors des plages valides.
     - Vérifie que le code de statut est 422 (données invalides).

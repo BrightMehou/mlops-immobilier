@@ -61,8 +61,8 @@ def save_prediction_request(
                 ],
             )
             conn.commit()
-    except Exception as e:
-        logger.error("Failed to save prediction request: %s", e)
+    except Exception:
+        logger.exception("Failed to save prediction request")
 
 
 def get_all_predictions(db_path: Path = DEFAULT_DB_PATH) -> list[dict[str, Any]]:
@@ -70,11 +70,11 @@ def get_all_predictions(db_path: Path = DEFAULT_DB_PATH) -> list[dict[str, Any]]
     try:
         with _connect(db_path) as conn:
             rows = conn.execute(
-                "SELECT * FROM prediction_requests ORDER BY created_at"
+                "SELECT * FROM prediction_requests ORDER BY created_at",
             ).fetchall()
             return [dict(row) for row in rows]
-    except Exception as e:
-        logger.error("Failed to load prediction requests: %s", e)
+    except Exception:
+        logger.exception("Failed to load prediction requests")
         return []
 
 
@@ -88,20 +88,20 @@ def init_db_from_csv(
 
     rows: list[list[float]] = []
     with csv_path.open(newline="", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            rows.append(
-                [
-                    float(row["MedInc"]),
-                    float(row["HouseAge"]),
-                    float(row["AveRooms"]),
-                    float(row["AveBedrms"]),
-                    float(row["Population"]),
-                    float(row["AveOccup"]),
-                    float(row["Latitude"]),
-                    float(row["Longitude"]),
-                    float(row["prediction"]),
-                ]
-            )
+        rows = [
+            [
+                float(row["MedInc"]),
+                float(row["HouseAge"]),
+                float(row["AveRooms"]),
+                float(row["AveBedrms"]),
+                float(row["Population"]),
+                float(row["AveOccup"]),
+                float(row["Latitude"]),
+                float(row["Longitude"]),
+                float(row["prediction"]),
+            ]
+            for row in csv.DictReader(f)
+        ]
 
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as conn:

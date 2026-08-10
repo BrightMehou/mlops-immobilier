@@ -1,5 +1,4 @@
-"""
-Application Streamlit d'exploration du dataset California Housing.
+"""Application Streamlit d'exploration du dataset California Housing.
 Elle permet de visualiser les données brutes, d'analyser les statistiques descriptives,
 d'explorer les corrélations entre variables, et de représenter les distributions
 ainsi que la répartition géographique des logements en Californie.
@@ -14,7 +13,8 @@ import streamlit as st
 from sklearn.datasets import fetch_california_housing
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
         "🔗 Corrélations",
         "📉 Pairplot",
         "🗺️ Carte",
-    ]
+    ],
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -83,7 +83,7 @@ petite unité géographique avec une population de 600 à 3 000 personnes.
 Ce dataset a été référencé dans l'article suivant :
 - Pace, R. Kelley et Ronald Barry, *Sparse Spatial Autoregressions*,
   Statistics and Probability Letters, 33 (1997) 291-297
-"""
+""",
     )
 
     with st.expander("🔍 Voir les données brutes"):
@@ -128,7 +128,7 @@ with tab2:
   quartiers plus anciens dans certaines zones prisées peuvent quand même avoir des valeurs élevées.
 - Population et AveOccup peuvent affecter indirectement les valeurs immobilières (par exemple,
   densité, urbain vs. rural).
-"""
+""",
     )
 
 
@@ -158,7 +158,7 @@ la valeur 5.
 
 Pour les pièces moyennes, les chambres moyennes, l'occupation moyenne et la population,
 l'étendue des données est importante avec des valeurs très élevées et peu fréquentes.
-"""
+""",
     )
 
 
@@ -222,7 +222,7 @@ with tab4:
 Les caractéristiques géospatiales montrent une forte corrélation interne due à la géographie de
 la Californie. **AveRooms** et **AveBedrms** sont fortement corrélées entre elles, indiquant une
 redondance potentielle dans la modélisation.
-"""
+""",
     )
 
 
@@ -266,7 +266,7 @@ de grande valeur de celles de faible valeur.
 Ainsi, lors de la création d'un modèle prédictif, nous pouvons nous attendre à ce que la
 longitude, la latitude et le revenu médian soient des caractéristiques particulièrement
 pertinentes.
-"""
+""",
     )
 
 
@@ -281,7 +281,7 @@ with tab6:
 La combinaison de la latitude et de la longitude peut nous aider à déterminer s'il existe des
 emplacements associés à des maisons de grande valeur. Dans le graphique ci-dessous, la couleur
 et la taille des cercles sont liées à la valeur médiane des maisons dans chaque district.
-"""
+""",
     )
 
     fig = px.scatter_mapbox(
@@ -309,5 +309,5 @@ et la taille des cercles sont liées à la valeur médiane des maisons dans chaq
         """
 Les maisons de grande valeur se situent principalement sur la côte, là où se trouvent les
 grandes villes de Californie : **San Diego**, **Los Angeles**, **San Jose** et **San Francisco**.
-"""
+""",
     )

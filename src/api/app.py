@@ -1,12 +1,12 @@
-"""
-API FastAPI pour déployer un modèle MLflow de prédiction des prix des logements en Californie.
+"""API FastAPI pour déployer un modèle MLflow de prédiction des prix des logements en Californie.
 Elle charge le modèle et son explainer SHAP, puis expose des endpoints pour effectuer des prédictions
 et interpréter les contributions des variables.
 """
 
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator
+from typing import Any
 
 import mlflow
 import pandas as pd
@@ -19,20 +19,21 @@ from src.api.db import get_all_predictions, init_db_from_csv, save_prediction_re
 from src.ml.drift_dectection import detect_drift, reference_data
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
 
 def get_latest_run_id(model_name: str = "Production-model") -> str:
-    """
-    Retourne le run_id de la version la plus récente du modèle MLflow spécifié.
+    """Retourne le run_id de la version la plus récente du modèle MLflow spécifié.
 
     Args:
         model_name (str): Nom du modèle MLflow.
 
     Returns:
         str: Identifiant de l'exécution (run_id).
+
     """
     client = MlflowClient()
     try:
@@ -41,26 +42,26 @@ def get_latest_run_id(model_name: str = "Production-model") -> str:
             raise ValueError(f"No versions found for model '{model_name}'")
         latest_version = max(versions, key=lambda v: int(v.version))
         return latest_version.run_id
-    except Exception as e:
-        logger.error(
-            f"Error occurred while fetching latest run ID for model '{model_name}': {e}"
+    except Exception:
+        logger.exception(
+            "Error occurred while fetching latest run ID for model '%s'",
+            model_name,
         )
         raise
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     """Charge la base monitoring, le modèle et l’explainer au démarrage."""
-
     init_db_from_csv()
     logger.info("Base monitoring initialisée")
 
-    RUN_ID = get_latest_run_id("Production-model")
-    MODEL_URI = f"runs:/{RUN_ID}/model"
-    EXPLAINER_URI = f"runs:/{RUN_ID}/explainer"
+    run_id = get_latest_run_id("Production-model")
+    model_uri = f"runs:/{run_id}/model"
+    explainer_uri = f"runs:/{run_id}/explainer"
 
-    app.state.model = mlflow.pyfunc.load_model(MODEL_URI)
-    app.state.explainer = mlflow.pyfunc.load_model(EXPLAINER_URI)
+    app.state.model = mlflow.pyfunc.load_model(model_uri)
+    app.state.explainer = mlflow.pyfunc.load_model(explainer_uri)
 
     yield
 
@@ -90,13 +91,12 @@ class InputFeatures(BaseModel):
 
 @app.get("/")
 async def root() -> dict[str, str]:
-    return {"msg": "API de prédiction des prix des logements opérationnelle ✅"}
+    return {"msg": "API de prédiction des prix des logements opérationnelle"}
 
 
 @app.get("/health")
 async def health_check(request: Request) -> JSONResponse:
-    """
-    Vérifie l'état de santé de l'API et du modèle.
+    """Vérifie l'état de santé de l'API et du modèle.
 
     Retourne :
     -------
@@ -141,8 +141,7 @@ def predict(
     input_data: InputFeatures,
     background_tasks: BackgroundTasks,
 ) -> dict[str, list[Any]]:
-    """
-    Prédit le prix d'un logement en Californie à partir de ses caractéristiques.
+    """Prédit le prix d'un logement en Californie à partir de ses caractéristiques.
 
     Cette fonction reçoit les données d'entrée sous forme d'un objet `InputFeatures`,
     les transforme en DataFrame compatible avec le modèle MLflow, puis retourne :

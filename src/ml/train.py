@@ -1,5 +1,4 @@
-"""
-Script d'entraînement pour un modèle de prédiction des prix des logements en Californie 🏡
+"""Script d'entraînement pour un modèle de prédiction des prix des logements en Californie 🏡
 
 Ce script utilise un GradientBoostingRegressor pour prédire les prix à partir du dataset California Housing.
 Le modèle est logué avec MLflow et évalué avec génération d’un explainer pour l’interprétation des prédictions.
@@ -15,7 +14,8 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import train_test_split
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,10 @@ housing = fetch_california_housing(as_frame=True)
 X = housing.data
 y = housing.target
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=RANDOM_STATE
+    X,
+    y,
+    test_size=0.2,
+    random_state=RANDOM_STATE,
 )
 
 # Paramètres du modèle
@@ -43,13 +46,12 @@ MODEL_PARAMS: dict[str, Any] = {
 
 
 def train() -> None:
-    """
-    Entraîne et logue un modèle de régression avec MLflow.
+    """Entraîne et logue un modèle de régression avec MLflow.
 
     Args:
         random_state (int): Graine aléatoire pour la reproductibilité.
-    """
 
+    """
     with mlflow.start_run(run_name=RUN_NAME):
         mlflow.sklearn.autolog(registered_model_name=MODEL_NAME)
         model = GradientBoostingRegressor(**MODEL_PARAMS)
@@ -73,8 +75,8 @@ def train() -> None:
                 "explainer_type": "permutation",
             },
         )
-        logger.info(f"Évaluation terminée. Artifacts : {result.artifacts}")
-        logger.info(f"Run ID : {mlflow.active_run().info.run_id}")
+        logger.info("Évaluation terminée. Artifacts : %s", result.artifacts)
+        logger.info("Run ID : %s", mlflow.active_run().info.run_id)
 
 
 if __name__ == "__main__":

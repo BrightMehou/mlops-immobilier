@@ -32,6 +32,7 @@ def test_save_and_get_predictions(tmp_path: Path) -> None:
 
 
 def test_init_db_from_csv(tmp_path: Path) -> None:
+    """Teste l'initialisation de la base de données à partir d'un fichier CSV."""
     csv_path = tmp_path / "prod_data.csv"
     db_path = tmp_path / "monitoring.db"
     csv_path.write_text(

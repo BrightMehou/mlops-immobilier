@@ -1,5 +1,4 @@
-"""
-Application Streamlit pour le déploiement d’un modèle de prédiction des prix
+"""Application Streamlit pour le déploiement d’un modèle de prédiction des prix
 des logements en Californie. Elle fournit une interface utilisateur interactive
 pour saisir les caractéristiques d’un logement, interroger l’API de prédiction
 et visualiser les explications SHAP associées.
@@ -14,47 +13,51 @@ import requests
 import streamlit as st
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
 st.set_page_config(
-    page_title="California housing prices", page_icon="🏠", layout="wide"
+    page_title="California housing prices",
+    page_icon="🏠",
+    layout="wide",
 )
 
 st.title("🏠 Prédiction du prix des logements en Californie")
 st.markdown(
     """
-Cette application utilise un modèle de machine learning pour prédire le prix des logements en Californie 
+Cette application utilise un modèle de machine learning pour prédire le prix des logements en Californie
 en fonction de plusieurs caractéristiques socio-démographiques et géographiques.
-"""
+""",
 )
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 
-def model_prediction(input: dict):
-    """
-    Envoie les données au modèle via une requête POST et retourne la prédiction formatée
+def model_prediction(input_data: dict):
+    """Envoie les données au modèle via une requête POST et retourne la prédiction formatée
     ainsi que les valeurs SHAP pour l’explication.
 
     Args:
-        input (dict): Données du logement à prédire.
+        input_data (dict): Données du logement à prédire.
 
     Returns:
         tuple: Message textuel avec le prix prédit, et liste des valeurs SHAP.
-    """
 
-    logger.info(f"Envoi des données au modèle : {input}")
+    """
+    logger.info("Envoi des données au modèle : %s", input_data)
     try:
-        response = requests.post(f"{API_BASE_URL}/predict", json=input)
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Erreur de connexion au modèle : {e}")
+        response = requests.post(f"{API_BASE_URL}/predict", json=input_data, timeout=10)
+    except requests.exceptions.RequestException:
+        logger.exception("Erreur de connexion au modèle")
         return "❌ Erreur : impossible de contacter le modèle.", None
 
     if response.status_code != 200:
         logger.error(
-            f"Réponse invalide du modèle ({response.status_code}) : {response.text}"
+            "Réponse invalide du modèle (%d) : %s",
+            response.status_code,
+            response.text,
         )
         return "⚠️ Erreur : le modèle a retourné une réponse incorrecte.", None
 
@@ -62,7 +65,7 @@ def model_prediction(input: dict):
     prediction = result["prediction"][0]
     shap_values = result.get("shap_values", [[]])[0]
 
-    logger.info(f"Réponse reçue du modèle : {prediction} avec SHAP {shap_values}")
+    logger.info("Réponse reçue du modèle : %f avec SHAP %s", prediction, shap_values)
 
     text_output = (
         f"💰 Le prix prédit pour le logement est : **{prediction * (10**5):,.0f} $**."
@@ -79,24 +82,38 @@ with col1:
         value=0.0,
     )
     houseage = st.number_input(
-        "📅 Âge moyen des maisons (en années)", min_value=0.0, value=0.0
+        "📅 Âge moyen des maisons (en années)",
+        min_value=0.0,
+        value=0.0,
     )
     averooms = st.number_input(
-        "🏠 Nombre moyen de pièces par logement", min_value=0.0, value=0.0
+        "🏠 Nombre moyen de pièces par logement",
+        min_value=0.0,
+        value=0.0,
     )
     avebedrms = st.number_input(
-        "🛏️ Nombre moyen de chambres par logement", min_value=0.0, value=0.0
+        "🛏️ Nombre moyen de chambres par logement",
+        min_value=0.0,
+        value=0.0,
     )
 with col2:
     population = st.number_input("👥 Population de la région", min_value=1.0, value=1.0)
     aveoccup = st.number_input(
-        "👨‍👩‍👧‍👦 Nombre moyen d'occupants par logement", min_value=0.0, value=0.0
+        "👨‍👩‍👧‍👦 Nombre moyen d'occupants par logement",
+        min_value=0.0,
+        value=0.0,
     )
     latitude = st.number_input(
-        "📍 Latitude de la région", min_value=31.0, max_value=43.0, value=37.0
+        "📍 Latitude de la région",
+        min_value=31.0,
+        max_value=43.0,
+        value=37.0,
     )
     longitude = st.number_input(
-        "🗺️ Longitude de la région", min_value=-125.0, max_value=-113.0, value=-119.0
+        "🗺️ Longitude de la région",
+        min_value=-125.0,
+        max_value=-113.0,
+        value=-119.0,
     )
 
 bouton = st.button("📈 Prédire")

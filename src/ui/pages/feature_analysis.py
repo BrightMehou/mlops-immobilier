@@ -1,5 +1,4 @@
-import glob
-import os
+from pathlib import Path
 
 import streamlit as st
 from PIL import Image
@@ -14,7 +13,7 @@ tab1, tab2, tab3, tab4 = st.tabs(
         "🐝 SHAP – Vue d'ensemble",  # Global   – distribution des contributions
         "🔍 SHAP – Par variable",  # Semi-local – zoom feature par feature
         "📊 SHAP – Résumé",  # Agrégé   – importance synthétique
-    ]
+    ],
 )
 
 
@@ -25,7 +24,7 @@ with tab1:
     st.markdown(
         """
 La **dépendance partielle** montre la relation entre une ou plusieurs caractéristiques (*features*)
-et la prédiction moyenne du modèle, tout en "neutralisant" l'effet des autres caractéristiques.  
+et la prédiction moyenne du modèle, tout en "neutralisant" l'effet des autres caractéristiques.
 Elle répond à la question : *Comment les prédictions changent-elles en fonction d'une
 caractéristique donnée, en moyenne ?*
 
@@ -33,22 +32,22 @@ caractéristique donnée, en moyenne ?*
 - Suppose que les caractéristiques sont indépendantes, ce qui n'est pas toujours vrai dans les
   données réelles.
 - Les interactions entre variables ne sont pas directement visibles.
-"""
+""",
     )
 
-    partial_dependence_pattern = os.path.join(
-        "data", "feature_analysis", "partial_dependence_*.png"
-    )
-    partial_dependence_images = sorted(glob.glob(partial_dependence_pattern))
+    output_dir = Path("data/feature_analysis")
+    partial_dependence_pattern = str(output_dir / "partial_dependence_*.png")
+    partial_dependence_images = sorted(output_dir.glob("partial_dependence_*.png"))
 
     if not partial_dependence_images:
         st.warning(
-            f"⚠️ Aucune image trouvée pour le motif : {partial_dependence_pattern}"
+            f"⚠️ Aucune image trouvée pour le motif : {partial_dependence_pattern}",
         )
     else:
-        for filepath in partial_dependence_images:
+        for filepath_str in partial_dependence_images:
+            filepath = Path(filepath_str)
             image = Image.open(filepath)
-            filename = os.path.basename(filepath).replace(".png", "")
+            filename = filepath.stem
             st.subheader(f"📈 {filename}")
             st.image(image, width="stretch")
             st.divider()
@@ -113,7 +112,7 @@ Cela confirme que les biens situés plus au sud, proches des zones côtières, o
 De manière similaire à la latitude, la valeur des biens diminue lorsque la longitude augmente,
 c'est-à-dire en s'éloignant de la côte californienne. Cette observation est cohérente avec les
 villes comme **San Diego**, **Los Angeles**, **San Jose**, ou **San Francisco**.
-"""
+""",
     )
 
 
@@ -142,10 +141,10 @@ est égale à la prédiction finale moins la valeur de base (*expected value*).
 Le **beeswarm plot** donne une vue d'ensemble de la distribution des valeurs SHAP sur l'ensemble
 des observations. Chaque point représente une observation ; la couleur indique la valeur de la
 caractéristique (rouge = élevée, bleue = faible).
-"""
+""",
     )
 
-    filepath_beeswarm = os.path.join("data", "feature_analysis", "beeswarm_plot.png")
+    filepath_beeswarm = output_dir / "beeswarm_plot.png"
     try:
         image_beeswarm = Image.open(filepath_beeswarm)
         st.image(image_beeswarm, width="stretch")
@@ -160,7 +159,7 @@ et **MedInc**. Ces caractéristiques jouent un rôle clé dans la détermination
 des maisons. Ensuite, des variables comme **AveOccup** et **AveRooms** exercent une influence
 moindre, mais non négligeable. Enfin, **HouseAge**, **Population**, et **AveBedrms** ont une
 contribution très faible.
-"""
+""",
     )
 
 
@@ -173,20 +172,19 @@ with tab3:
 Les **scatter plots SHAP** montrent, pour chaque caractéristique, la valeur SHAP de chaque
 observation en fonction de la valeur de la caractéristique. Ils permettent de visualiser des
 effets non-linéaires et des interactions que la dépendance partielle ne capture pas toujours.
-"""
+""",
     )
 
-    scatter_plot_pattern = os.path.join(
-        "data", "feature_analysis", "scatter_plot_*.png"
-    )
-    scatter_plot_images = sorted(glob.glob(scatter_plot_pattern))
+    scatter_plot_pattern = str(output_dir / "scatter_plot_*.png")
+    scatter_plot_images = sorted(output_dir.glob("scatter_plot_*.png"))
 
     if not scatter_plot_images:
         st.warning(f"⚠️ Aucune image trouvée pour le motif : {scatter_plot_pattern}")
     else:
-        for filepath in scatter_plot_images:
+        for filepath_str in scatter_plot_images:
+            filepath = Path(filepath_str)
             image = Image.open(filepath)
-            filename = os.path.basename(filepath).replace(".png", "")
+            filename = filepath.stem
             st.subheader(f"📈 {filename}")
             st.image(image, width="stretch")
             st.divider()
@@ -200,11 +198,11 @@ with tab4:
         """
 Les graphiques ci-dessous agrègent les valeurs SHAP sur l'ensemble des observations pour fournir
 une mesure synthétique de l'importance de chaque caractéristique à l'échelle du modèle entier.
-"""
+""",
     )
 
     # Bar plot – moyenne des valeurs SHAP absolues
-    filepath_bar = os.path.join("data", "feature_analysis", "bar_plot.png")
+    filepath_bar = output_dir / "bar_plot.png"
     try:
         image_bar = Image.open(filepath_bar)
         st.subheader("📊 Importance moyenne (|SHAP| moyen)")
@@ -220,13 +218,11 @@ En moyenne, les caractéristiques **Latitude**, **Longitude**, **MedInc**, **Ave
 absolue, à hauteur de **0,86**, **0,75**, **0,35**, **0,19**, **0,11**, **0,05**, **0,03**, et
 **0,03** à la prédiction du modèle par rapport à la baseline. Ces résultats confirment l'influence
 majeure des trois premières caractéristiques et la contribution plus marginale des autres.
-"""
+""",
     )
 
     # Bar plot – maximum des valeurs SHAP absolues
-    filepath_bar_abs_max = os.path.join(
-        "data", "feature_analysis", "bar_plot_abs_max.png"
-    )
+    filepath_bar_abs_max = output_dir / "bar_plot_abs_max.png"
     try:
         image_bar_abs_max = Image.open(filepath_bar_abs_max)
         st.subheader("📊 Importance maximale (|SHAP| max)")
@@ -243,5 +239,5 @@ les contributions maximales les plus élevées, toutes proches de **2**. Cela mo
 les prédictions du modèle. **AveOccup** et **HouseAge** présentent des contributions
 intermédiaires, tandis que **Population**, **AveBedrms** et les autres variables affichent des
 contributions plus faibles mais non négligeables.
-"""
+""",
     )
